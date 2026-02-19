@@ -1,5 +1,4 @@
 const vscode = require('vscode');
-const dglab = require('./dglab-server.js');
 const ui = require('./vsc-ui.js');
 const conf = require('./config.js');
 

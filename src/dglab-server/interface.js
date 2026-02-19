@@ -1,6 +1,6 @@
 const vscode = require('vscode');
-const conf = require('./config.js');
-const ui = require('./vsc-ui.js');
+const conf = require('../config.js');
+const ui = require('../vsc-ui.js');
 const WebScoket = require('ws');
 var status = 0;
 /**
@@ -42,7 +42,8 @@ function startServer() {
     power.paused = false;
     wsServer = new WebScoket.Server({ port });
   } catch (error) {
-    
+    console.error("无法启动DGLAB WebScoket服务器：", error);
+    vscode.window.showErrorMessage(`无法启动WebScoket服务器：${error.message}`);
   }
 }
 

@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const dglab = require('./dglab-server.js');
+const dglab = require('./dglab-server/interface.js');
 
 /**
  * 插件持有的全部VSC UI元素
