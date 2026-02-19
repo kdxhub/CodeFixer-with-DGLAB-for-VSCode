@@ -164,6 +164,12 @@ function TerminalErrorcodeProcessor(event, context) {
       break;
   }
   console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+
+  // 出现提示
+  const tips = config.terminal.tips();
+  if (tips != null && tips.length != 0) {
+    vscode.window.showInformationMessage(tips.replaceAll("%duration%", duration.toString()).replaceAll("%strength%", strength.toString()));
+  };
 }
 
 module.exports = {
