@@ -28,9 +28,9 @@
     ],
     "configuration": [
       {
-        "title": "强度",
+        "title": "代码纠错",
         "properties": {
-          "codefixer-with-dg-lab.side": {
+          "codefixer-with-dg-lab.code.side": {
             "type": [
               "left",
               "right",
@@ -38,37 +38,72 @@
               "mixed"
             ],
             "default": "mixed",
-            "description": "强度往哪个电极输出。其中 mixed 表示随机，其它的都是字面意思。"
+            "description": "强度往哪个电极输出。其中默认值 mixed 表示随机，其它的都是字面意思。"
           },
-          "codefixer-with-dg-lab.add.infoFirst": {
+          "codefixer-with-dg-lab.code.inrevertable": {
+            "type": "boolean",
+            "default": false,
+            "description": "控制强度能否下降。默认值 false 表示可以下降。"
+          },
+          "codefixer-with-dg-lab.code.infoFirst": {
             "type": "number",
             "default": 0,
             "description": "第一个信息增加的强度"
           },
-          "codefixer-with-dg-lab.add.infoEvery": {
+          "codefixer-with-dg-lab.code.infoEvery": {
             "type": "number",
             "default": 0,
             "description": "除了第一个信息以外的每个信息增加的强度"
           },
-          "codefixer-with-dg-lab.add.warnFirst": {
+          "codefixer-with-dg-lab.code.warnFirst": {
             "type": "number",
             "default": 10,
             "description": "第一个警告增加的强度"
           },
-          "codefixer-with-dg-lab.add.warnEvery": {
+          "codefixer-with-dg-lab.code.warnEvery": {
             "type": "number",
             "default": 1,
             "description": "除了第一个警告以外的每个警告增加的强度"
           },
-          "codefixer-with-dg-lab.add.errorFirst": {
+          "codefixer-with-dg-lab.code.errorFirst": {
             "type": "number",
             "default": 20,
             "description": "第一个错误增加的强度"
           },
-          "codefixer-with-dg-lab.add.errorEvery": {
+          "codefixer-with-dg-lab.code.errorEvery": {
             "type": "number",
             "default": 10,
             "description": "除了第一个错误以外的每个错误增加的强度"
+          }
+        }
+      },
+      {
+        "title": "终端纠错",
+        "properties": {
+          "codefixer-with-dg-lab.terminal.side": {
+            "type": [
+              "left",
+              "right",
+              "both",
+              "mixed"
+            ],
+            "default": "mixed",
+            "description": "强度往哪个电极输出。其中默认值 mixed 表示随机，其它的都是字面意思。"
+          },
+          "codefixer-with-dg-lab.terminal.inrevertable": {
+            "type": "boolean",
+            "default": false,
+            "description": "控制强度能否下降。默认值 false 表示可以下降。"
+          },
+          "codefixer-with-dg-lab.terminal.rate": {
+            "type": "number",
+            "default": 0.5,
+            "description": "当终端产生错误时，将错误代码转换为强度的倍率。\n将 %ERRORLEVEL% 或者 $? 乘以此系数得到的值作为强度。"
+          },
+          "codefixer-with-dg-lab.terminal.duration": {
+            "type": "number",
+            "default": 3000,
+            "description": "当终端产生错误时，强度将叠加多长时间。单位毫秒"
           }
         }
       },

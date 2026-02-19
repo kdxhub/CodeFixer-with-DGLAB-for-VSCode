@@ -37,14 +37,15 @@ function getConnected() { return connected; };
 // 强度相关变量
 const power = {
   left: {
-    value: 0,
-    set: function (value) { power.value = value; },
-    get: function () { return power.value; },
+    // 第一个表示代码纠错，第二个表示终端纠错
+    value: [0, 0],
+    set: function (index, value) { power.left.value[index] = value; },
+    get: function () { return power.left.value[0] + power.left.value[1]; },
   },
   right: {
-    value: 0,
-    set: function (value) { power.value = value; },
-    get: function () { return power.value; },
+    value: [0, 0],
+    set: function (index, value) { power.right.value[index] = value; },
+    get: function () { return power.right.value[0] + power.right.value[1]; },
   },
   paused: false,
   pause: function () {

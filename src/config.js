@@ -1,40 +1,62 @@
 const vscode = require("vscode");
 const conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
-const strength = {
+const code = {
   info: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("add.infoFirst") },
+    first: function () { return conf.get("code.infoFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("add.infoEvery") },
+    every: function () { return conf.get("code.infoEvery") },
   },
   warn: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("add.warnFirst") },
+    first: function () { return conf.get("code.warnFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("add.warnEvery") },
+    every: function () { return conf.get("code.warnEvery") },
   },
   error: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("add.errorFirst") },
+    first: function () { return conf.get("code.errorFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("add.errorEvery") },
+    every: function () { return conf.get("code.errorEvery") },
   },
   /**
    * @returns {String} 工作模式
    */
-  mode: function () { return conf.get("side") },
+  mode: function () { return conf.get("code.side") },
+  /**
+   * @returns {boolean}
+   */
+  inrevertable: function () { return conf.get("code.inrevertable") },
+}
+const terminal = {
+  /**
+   * @returns {String} 工作模式
+   */
+  mode: function () { return conf.get("terminal.side") },
+  /**
+   * @returns {boolean}
+   */
+  inrevertable: function () { return conf.get("terminal.side") },
+  /**
+   * @returns {number}
+   */
+  rate: function () { return conf.get("terminal.rate") },
+  /**
+   * @returns {number}
+   */
+  duration: function () { return conf.get("terminal.duration") },
 }
 const server = {
   /**
@@ -44,6 +66,7 @@ const server = {
 }
 
 module.exports = {
-  strength: strength,
+  code: code,
+  terminal: terminal,
   server: server,
 }
