@@ -1,4 +1,5 @@
 const vscode = require("vscode");
+const pulseHelper = require('./dglab-server/getpluse.js');
 const conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
 const code = {
   info: {
@@ -82,9 +83,20 @@ const server = {
     correctlevel: function () { return conf.get("server.qrcode.correctionLevel") },
   }
 }
+const pulse = {
+  left: {
+    get: function () { return conf.get("pulse.left"); },
+    getData: function () { return pulseHelper.get(pulse.left.get()); },
+  },
+  right: {
+    get: function () { return conf.get("pulse.right") },
+    getData: function () { return pulseHelper.get(pulse.right.get()); },
+  }
+}
 
 module.exports = {
   code: code,
   terminal: terminal,
   server: server,
+  pulse: pulse,
 }

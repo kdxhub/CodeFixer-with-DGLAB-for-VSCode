@@ -178,18 +178,30 @@ function distributePunishment() {
 
   // 遍历每个客户端，发送配置包
   clients.forEach((client, clientId) => {
-    client.send(JSON.stringify({
-      type: "msg",
-      clientId: clientId,
-      targetId: targetId,
-      message: `strength-1+2+${power.left.get()}`,
-    }));
-    client.send(JSON.stringify({
-      type: "msg",
-      clientId: clientId,
-      targetId: targetId,
-      message: `strength-2+2+${power.right.get()}`,
-    }));
+    client.send({
+      "type": "msg",
+      "clientId": clientId,
+      "targetId": targetId,
+      "message": `strength-1+2+${power.left.get()}`,
+    });
+    client.send({
+      "type": "msg",
+      "clientId": clientId,
+      "targetId": targetId,
+      "message": `strength-2+2+${power.right.get()}`,
+    });
+    client.send({
+      "type": "msg",
+      "clientId": clientId,
+      "targetId": targetId,
+      "message": `pulse-A:${conf.pulse.left.getData()}`
+    });
+    client.send({
+      "type": "msg",
+      "clientId": clientId,
+      "targetId": targetId,
+      "message": `pulse-B:${conf.pulse.right.getData()}`
+    });
   });
 };
 
