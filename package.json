@@ -18,8 +18,12 @@
         "title": "DGLAB: 开启WebScoket"
       },
       {
+        "command": "dglab.update",
+        "title": "DGLAB: 强制刷新工作状态"
+      },
+      {
         "command": "dglab.detail",
-        "title": "DGLAB: 显示详情信息"
+        "title": "DGLAB: 切换工作状态"
       }
     ],
     "configuration": [
