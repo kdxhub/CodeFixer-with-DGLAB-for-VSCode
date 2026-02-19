@@ -120,6 +120,16 @@
             "type": "number",
             "default": 59999,
             "description": "服务器端口"
+          },
+          "codefixer-with-dg-lab.server.qrcode.correctionLevel": {
+            "type": ["L", "M", "Q", "H"],
+            "default": "Q",
+            "description": "二维码纠错级别，越大的纠错级别扫描成功率更高，也更慢。从低到高为 L M Q H。"
+          },
+          "codefixer-with-dg-lab.server.qrcode.size": {
+            "type": "integer",
+            "default": 320,
+            "description": "生成的二维码的大小（像素）。越大的值生成所需要的时间越长。"
           }
         }
       }
@@ -159,6 +169,7 @@
     "eslint": "^9.39.2"
   },
   "dependencies": {
+    "qrcode": "^1.5.4",
     "uuid": "^8.3.2",
     "ws": "^8.19.0"
   }

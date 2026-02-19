@@ -1,5 +1,16 @@
 const vscode = require('vscode');
 const dglab = require('./dglab-server/main.js');
+const os = require('os');
+const path = require('path');
+const fs = require('fs').promises;
+const conf = require('./config.js');
+let qrcode/* ES模块需要异步加载 */;
+async function loadQrcode() {
+  if (!qrcode) {
+    qrcode = await import('qrcode');
+  }
+  return qrcode;
+}
 
 /**
  * 插件持有的全部VSC UI元素
@@ -77,7 +88,67 @@ function updateStatusBar() {
       break;
   }
 }
-dglab.regisiter/* 注册回调函数 */(updateStatusBar);
+
+/**
+ * 显示连接方法
+ * @param {String} address 传入IP,端口自动读取
+ */
+async function showConnect(address = "0.0.0.0") {
+  // 转为二维码并保存到临时文件
+  const filePath = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}`);
+  if (filePath == null) { return; };
+
+  // 显示二维码
+  try {
+    // 创建文件 URI
+    const fileUri = vscode.Uri.file(await filePath);
+
+    // 打开文档（VS Code 会自动识别图片类型）
+    const doc = await vscode.workspace.openTextDocument(fileUri);
+
+    // 在编辑器中显示（列：vscode.ViewColumn.One 表示第一列）
+    await vscode.window.showTextDocument(doc, {
+      viewColumn: vscode.ViewColumn.Active,
+      preview: true  // 以预览模式打开
+    });
+
+  } catch (error) {
+    vscode.window.showErrorMessage(`二维码已经生成，但无法打开: ${error.message}。\n你可手动访问 ${filePath}`);
+  }
+};
+
+/**
+ * 生成临时二维码
+ * @param {String} text 
+ * @returns 
+ */
+async function generateQRCodeWithText(text) {
+  try {
+    const qr = await loadQrcode();
+
+    // 创建临时文件路径（在系统临时目录下）
+    const tmpDir = os.tmpdir();
+    const fileName = `qrcode-${Date.now()}.png`;
+    const filePath = path.join(tmpDir, fileName);
+
+    // 生成二维码并保存为 PNG
+    await qr.toFile(filePath, text, {
+      type: 'png',
+      width: conf.server.qrcode.size(),
+      margin: 2,
+      color: {
+        dark: '#000000',  // 黑色模块
+        light: '#ffffff'  // 白色背景
+      },
+      errorCorrectionLevel: conf.server.qrcode.correctlevel()
+    });
+    console.log(`二维码已生成: ${filePath}`);
+    return filePath;
+  } catch (error) {
+    vscode.window.showErrorMessage(`生成二维码失败: ${error.message}`);
+    throw null;
+  }
+}
 
 function onDisable() { }
 
@@ -87,3 +158,4 @@ module.exports = {
   onEnable: onEnable,
   onDisable: onDisable,
 }
+dglab.regisiter/* 注册回调函数 */(updateStatusBar, showConnect);

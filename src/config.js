@@ -67,6 +67,16 @@ const server = {
    * @returns {Number}
    */
   port: function () { return conf.get("server.port") },
+  qrcode: {
+    /**
+     * @returns {Number}
+     */
+    size: function () { return conf.get("server.qrcode.size") },
+    /**
+     * @returns {String}
+     */
+    correctlevel: function () { return conf.get("server.qrcode.correctionLevel") },
+  }
 }
 
 module.exports = {
