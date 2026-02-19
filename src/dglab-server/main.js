@@ -73,12 +73,26 @@ const power = {
     // 第一个表示代码纠错，第二个表示终端纠错
     value: [0, 0],
     set: function (index, value) { power.left.value[index] = value; },
-    get: function () { return power.left.value[0] + power.left.value[1]; },
+    get: function () {
+      let v = Math.floor(power.left.value[0] + power.left.value[1]);
+      if (v >= 200) {
+        return 200;
+      } else if (v <= 0) {
+        return 0;
+      } else { return v; };
+    },
   },
   right: {
     value: [0, 0],
     set: function (index, value) { power.right.value[index] = value; },
-    get: function () { return power.right.value[0] + power.right.value[1]; },
+    get: function () {
+      let v = Math.floor(power.right.value[0] + power.right.value[1]);
+      if (v >= 200) {
+        return 200;
+      } else if (v <= 0) {
+        return 0;
+      } else { return v; };
+    },
   },
   paused: false,
   pause: function () {
@@ -140,7 +154,32 @@ function startServer() {
       console.warn("用户中断了服务器开启流程");
     }
   });
-}
+};
+
+/** 
+ * 立即下发强度配置
+ * @apinote 每隔60秒心跳包下发时也会自动下发配置
+ */
+function distributePunishment() {
+  if (getConnected() <= 0) { return; };
+  console.log("正在下发强度配置");
+
+  // 遍历每个客户端，发送配置包
+  clients.forEach((client, clientId) => {
+    client.send(JSON.stringify({
+      type: "msg",
+      clientId: clientId,
+      targetId: targetId,
+      message: `strength-1+2+${power.left.get()}`,
+    }));
+    client.send(JSON.stringify({
+      type: "msg",
+      clientId: clientId,
+      targetId: targetId,
+      message: `strength-2+2+${power.right.get()}`,
+    }));
+  });
+};
 
 function startServerInternal() {
   let port = conf.server.port();
@@ -167,9 +206,10 @@ function startServerInternal() {
             heartbeatMsg.targetId = targetId;
             client.send(JSON.stringify(heartbeatMsg));
           });
-        }
+          distributePunishment();
+        };
       }, 60 * 1000); // 每分钟发送一次心跳消息
-    }
+    };
 
     // 注册连接事件
     wss.on('connection', (ws) => {
@@ -214,48 +254,6 @@ function startServerInternal() {
           ws.send(JSON.stringify(sendData));
           return;
         };
-
-        // 下发惩罚配置
-        // if (data.type === "punishmentConfig") {
-        //   if (!data.channel) {
-        //     const errorData = { type: "error", clientId: data.clientId, targetId: data.targetId, message: "406-channel is empty" };
-        //     ws.send(JSON.stringify(errorData));
-        //     return;
-        //   };
-
-        //   if (clients.has(data.targetId)) {
-        //     const target = clients.get(data.targetId);
-        //     const sendtime = data.time ? data.time : 5; // 默认发送时间 5 秒
-        //     const sendStrength = data.channel === "A" ? power.left.get() : power.right.get();
-        //     const sendData = { type: "msg", clientId: data.clientId, targetId: data.targetId, message: `pulse-${sendStrength}` };
-        //     const totalSends = 1 * sendtime; // 默认每秒发送一次
-        //     const timeSpace = 1000; // 每秒发送一次
-
-        //     if (clientTimers.has(data.clientId + "-" + data.channel)) {
-        //       console.log(`通道 ${data.channel} 覆盖消息发送中，总消息数：${totalSends} 持续时间：${sendtime}`);
-        //       ws.send(`当前通道 ${data.channel} 有正在发送的消息，覆盖之前的消息`);
-
-        //       const timerId = clientTimers.get(data.clientId + "-" + data.channel);
-        //       clearInterval(timerId);
-        //       clientTimers.delete(data.clientId + "-" + data.channel);
-
-        //       const clearData = { clientId: data.clientId, targetId: data.targetId, message: `clear-${data.channel === "A" ? 1 : 2}`, type: "msg" };
-        //       target.send(JSON.stringify(clearData));
-
-        //       setTimeout(() => {
-        //         delaySendMsg(data.clientId, ws, target, sendData, totalSends, timeSpace, data.channel);
-        //       }, 150);
-        //     } else {
-        //       delaySendMsg(data.clientId, ws, target, sendData, totalSends, timeSpace, data.channel);
-        //       console.log(`通道 ${data.channel} 消息发送中，总消息数：${totalSends} 持续时间：${sendtime}`);
-        //     };
-        //   } else {
-        //     console.log(`未找到匹配的客户端，clientId: ${data.clientId}`);
-        //     const errorData = { clientId: data.clientId, targetId: data.targetId, message: "404", type: "msg" };
-        //     ws.send(JSON.stringify(errorData));
-        //   };
-        //   return;
-        // }
       });
 
       ws.on('close', () => {
@@ -388,6 +386,7 @@ module.exports = {
   stopServer,
   switchMode,
   getStatus,
+  distributePunishment,
   getConnected,
   wsServer: () => { return wss; },
   regisiter,

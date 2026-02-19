@@ -65,6 +65,7 @@ function onEnable(c) {
  */
 function updateStatusBar() {
   console.log(`触发状态栏刷新动作，当前状态为：`, dglab.getStatus());
+  dglab.distributePunishment();
   switch (dglab.getStatus()) {
     case 0:
       elements.statusBar.info.text = "$(error)DGLAB：禁用";
