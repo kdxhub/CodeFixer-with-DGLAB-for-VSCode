@@ -100,22 +100,14 @@ async function showConnect(ip = "0.0.0.0") {
   if (confIp) { address = confIp };
 
   // 转为二维码并保存到临时文件
-  const filePath = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}`);
+  const filePathPromise = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}`);
+  const filePath = (await filePathPromise).normalize();
   if (filePath == null) { return; };
 
   // 显示二维码
   try {
-    // 创建文件 URI
-    const fileUri = vscode.Uri.file(await filePath);
-
-    // 打开文档（VS Code 会自动识别图片类型）
-    const doc = await vscode.workspace.openTextDocument(fileUri);
-
     // 在编辑器中显示（列：vscode.ViewColumn.One 表示第一列）
-    await vscode.window.showTextDocument(doc, {
-      viewColumn: vscode.ViewColumn.Active,
-      preview: true  // 以预览模式打开
-    });
+    await vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
     if (confIp) {
       vscode.window.showInformationMessage(`二维码已生成并打开，请使用同一局域网下的 DG-LAB 客户端扫码连接。\n若无法查看二维码，你可手动访问 ${filePath} 。\nIP地址在配置文件中被覆写为 ${address} 。`);
     } else {
