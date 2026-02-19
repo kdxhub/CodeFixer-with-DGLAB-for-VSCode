@@ -158,7 +158,8 @@ function startServer() {
 
 /** 
  * 立即下发强度配置
- * @apinote 每隔60秒心跳包下发时也会自动下发配置
+ * @apinote 正常情况下，更新强度后手动调用 vsc_ui.js 的 updateStatusBar() ，其会自动调用本方法。
+ * @apinote 每隔60秒心跳包下发时也会自动下发配置。
  */
 function distributePunishment() {
   if (getConnected() <= 0) { return; };

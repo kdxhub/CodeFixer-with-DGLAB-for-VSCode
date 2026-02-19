@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const config = require('../config.js');
 const dglab = require('./main.js');
+const ui = require('../vsc-ui.js');
 
 function EventDiagnosticProcessor(event, context) {
   // 获取当前激活的编辑器
@@ -75,6 +76,7 @@ function EventDiagnosticProcessor(event, context) {
       break;
   }
   console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+  ui.updateStatusBar();
 }
 
 function TerminalErrorcodeProcessor(event, context) {
@@ -105,6 +107,7 @@ function TerminalErrorcodeProcessor(event, context) {
         setTimeout(() => {
           dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
           console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+          ui.updateStatusBar();
         }, duration);
       };
       break;
@@ -115,6 +118,7 @@ function TerminalErrorcodeProcessor(event, context) {
         setTimeout(() => {
           dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
           console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+          ui.updateStatusBar();
         }, duration);
       };
       break;
@@ -126,6 +130,7 @@ function TerminalErrorcodeProcessor(event, context) {
           dglab.power().right.set(1, -strength / 2 + dglab.power().right.value[1]);
           dglab.power().left.set(1, -strength / 2 + dglab.power().left.value[1]);
           console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+          ui.updateStatusBar();
         }, duration);
       };
       break;
@@ -137,6 +142,7 @@ function TerminalErrorcodeProcessor(event, context) {
           dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
           dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
           console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+          ui.updateStatusBar();
         }, duration);
       };
       break;
@@ -149,6 +155,7 @@ function TerminalErrorcodeProcessor(event, context) {
           setTimeout(() => {
             dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
             console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+            ui.updateStatusBar();
           }, duration);
         };
       } else {
@@ -158,12 +165,14 @@ function TerminalErrorcodeProcessor(event, context) {
           setTimeout(() => {
             dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
             console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+            ui.updateStatusBar();
           }, duration);
         };
       };
       break;
   }
   console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+  ui.updateStatusBar();
 
   // 出现提示
   const tips = config.terminal.tips();
