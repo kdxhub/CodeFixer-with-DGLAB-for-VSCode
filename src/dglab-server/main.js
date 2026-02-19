@@ -1,5 +1,3 @@
-import { warn } from 'node:console';
-
 const vscode = require('vscode');
 const conf = require('../config.js');
 const WebScoket = require('ws');
