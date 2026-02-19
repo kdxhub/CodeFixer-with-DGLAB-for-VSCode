@@ -11,9 +11,7 @@ const clients = new Map();
 
 // 存储消息关系
 const relations = new Map();
-
 const punishmentDuration = 5; //默认发送时间1秒
-
 const punishmentTime = 1; // 默认一秒发送1次
 
 // 存储客户端和发送计时器关系

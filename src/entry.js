@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const ui = require('./vsc-ui.js');
+const dglab = require('./dglab-server/main.js');
 const events = require('./dglab-server/events.js');
 
 /**
@@ -18,7 +19,9 @@ function activate(context) {
   // vscode.window.onDidChangeTerminalShellIntegration(async (e) => { events.TerminalErrorcodeProcessor(e, context); }, null, context.subscriptions);
 }
 
-function deactivate() { }
+function deactivate() {
+  if (dglab.getStatus() != 0) { dglab.stopServer() };
+}
 
 async function ensureShellIntegration() {
   const config = vscode.workspace.getConfiguration('terminal.integrated');
