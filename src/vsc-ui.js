@@ -111,9 +111,10 @@ async function showConnect(address = "0.0.0.0") {
       viewColumn: vscode.ViewColumn.Active,
       preview: true  // 以预览模式打开
     });
+    vscode.window.showInformationMessage(`二维码已生成并打开，请使用同一局域网下的 DG-LAB 客户端扫码连接。\n若无法查看二维码，你可手动访问 ${filePath} 。\n识别到的IP地址为 ${address} ，若错误导致无法连接请在设置中手动覆写。`);
 
   } catch (error) {
-    vscode.window.showErrorMessage(`二维码已经生成，但无法打开: ${error.message}。\n你可手动访问 ${filePath}`);
+    vscode.window.showErrorMessage(`二维码已经生成，但无法打开: ${error.message}。\n你可手动访问 ${filePath} 。`);
   }
 };
 
