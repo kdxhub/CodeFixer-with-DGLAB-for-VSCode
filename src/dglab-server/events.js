@@ -144,7 +144,7 @@ function TerminalErrorcodeProcessor(event, context) {
       // 随机一边
       if (Math.random() <= .5) {
         dglab.power().right.set(1, strength + originRight);
-        dglab.power().left.set(1, 0);
+        dglab.power().left.set(1, originLeft);
         if (invertable) {
           setTimeout(() => {
             dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
@@ -152,7 +152,7 @@ function TerminalErrorcodeProcessor(event, context) {
           }, duration);
         };
       } else {
-        dglab.power().right.set(1, 0);
+        dglab.power().right.set(1, originRight);
         dglab.power().left.set(1, strength + originLeft);
         if (invertable) {
           setTimeout(() => {
