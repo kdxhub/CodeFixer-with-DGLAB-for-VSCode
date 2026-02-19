@@ -1,6 +1,5 @@
-import config from '../config.js';
-
 const vscode = require('vscode');
+const config = require('../config.js');
 const dglab = require('./main.js');
 
 /**

@@ -1,6 +1,6 @@
 const vscode = require('vscode');
-const conf = require('../config.js');
 const WebScoket = require('ws');
+const conf = require('../config.js');
 
 // 存储变量
 /**

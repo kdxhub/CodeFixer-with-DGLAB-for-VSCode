@@ -1,7 +1,6 @@
 const vscode = require('vscode');
 const ui = require('./vsc-ui.js');
 const events = require('./dglab-server/events.js');
-const conf = require('./config.js');
 
 /**
  * @param {vscode.ExtensionContext} context
