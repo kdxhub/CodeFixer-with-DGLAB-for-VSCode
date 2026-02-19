@@ -75,8 +75,7 @@ wss.on('connection', function connection(ws) {
               const sendData = { clientId, targetId, message: "200", type: "bind" }
               ws.send(JSON.stringify(sendData));
               client.send(JSON.stringify(sendData));
-            }
-            else {
+            } else {
               const data = { type: "bind", clientId, targetId, message: "400" }
               ws.send(JSON.stringify(data))
               return;

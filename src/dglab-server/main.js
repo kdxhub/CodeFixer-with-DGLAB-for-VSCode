@@ -14,10 +14,6 @@ var status = 0;
 var wss;
 /** 储存已连接的用户及其标识 */
 const clients = new Map();
-/** 存储消息关系 */
-const relations = new Map();
-const punishmentDuration = 5;
-const punishmentTime = 1;
 /** 存储客户端和发送计时器关系 */
 const clientTimers = new Map();
 /** 心跳消息 */
@@ -32,6 +28,10 @@ const heartbeatMsg = {
  * @type {NodeJS.Timeout}
  */
 let heartbeatInterval = null;
+/**
+ * 由于本插件既有服务器又有前端功能，所以实际上所有客户端都因绑定到一个固定的uuid上
+ */
+const targetId = "c87d4640-17f3-4e23-862c-4f6ef7c550dd";
 /** 警告信息文本 */
 const warnmsg = `欢迎使用本插件。在继续操作前，请仔细阅读以下注意事项，充分了解相关风险：
 1. 功能说明：本插件通过联动 DG-LAB 设备，将 VSCode 中的特定状态转换为电击强度，从而对您施加电刺激。
@@ -161,10 +161,10 @@ function startServerInternal() {
       heartbeatInterval = setInterval(() => {
         // 遍历 clients Map（大于0个链接），向每个客户端发送心跳消息
         if (getConnected() > 0) {
-          console.log(relations.size, getConnected(), '发送心跳消息：' + new Date().toLocaleString());
+          console.log("向 ",getConnected(), ' 个客户端发送心跳消息：' + new Date().toLocaleString());
           clients.forEach((client, clientId) => {
             heartbeatMsg.clientId = clientId;
-            heartbeatMsg.targetId = relations.get(clientId) || '';
+            heartbeatMsg.targetId = targetId;
             client.send(JSON.stringify(heartbeatMsg));
           });
         }
@@ -179,13 +179,85 @@ function startServerInternal() {
       clients.set(clientId, ws);
       if (!power.paused/* 暂停时不更新状态 */) { status = 2; };
       updateStatusBar();
-
+ 
       // 握手
       ws.send(JSON.stringify({ type: 'bind', clientId, message: 'targetId', targetId: '' }));
 
       // 确立后续协议
-      ws.on('message', (data) => {
+      ws.on('message', (ev) => {
+        // 收到消息时开始解析
+        const id = `#${Math.floor(Math.random() * 1e6)}`;
+        console.log(`收到消息${id} ：` + ev);
+        let data = null;
+        try {
+          // @ts-ignore
+          data = JSON.parse(ev);
+        } catch (e) {
+          // 非JSON数据处理
+          console.warn(`消息${id} 无效：`, e);
+          ws.send(JSON.stringify({ type: 'msg', clientId: "", targetId: "", message: /* 虽然403是无权限，但官方文档是这么写的 */'403' }));
+          return;
+        };
+        // 文档定义了这个消息体，保留但忽略
+        // const { clientId, targetId, message, type } = data;
+
+        // 非法消息来源拒绝
+        if (clients.get(data.clientId) !== ws && clients.get(data.targetId) !== ws) {
+          console.warn(`消息${id} 无效，其来源不正确。`);
+          ws.send(JSON.stringify({ type: 'msg', clientId: "", targetId: "", message: /* 同理与文档保持一致 */'404' }));
+          return;
+        };
+
+        // 申请绑定
+        if (data.type === "bind") {
+          const sendData = { clientId, targetId, message: "200", type: "bind" }
+          ws.send(JSON.stringify(sendData));
+          return;
+        };
+
+        // 下发惩罚配置
+        // if (data.type === "punishmentConfig") {
+        //   if (!data.channel) {
+        //     const errorData = { type: "error", clientId: data.clientId, targetId: data.targetId, message: "406-channel is empty" };
+        //     ws.send(JSON.stringify(errorData));
+        //     return;
+        //   };
+
+        //   if (clients.has(data.targetId)) {
+        //     const target = clients.get(data.targetId);
+        //     const sendtime = data.time ? data.time : 5; // 默认发送时间 5 秒
+        //     const sendStrength = data.channel === "A" ? power.left.get() : power.right.get();
+        //     const sendData = { type: "msg", clientId: data.clientId, targetId: data.targetId, message: `pulse-${sendStrength}` };
+        //     const totalSends = 1 * sendtime; // 默认每秒发送一次
+        //     const timeSpace = 1000; // 每秒发送一次
+
+        //     if (clientTimers.has(data.clientId + "-" + data.channel)) {
+        //       console.log(`通道 ${data.channel} 覆盖消息发送中，总消息数：${totalSends} 持续时间：${sendtime}`);
+        //       ws.send(`当前通道 ${data.channel} 有正在发送的消息，覆盖之前的消息`);
+
+        //       const timerId = clientTimers.get(data.clientId + "-" + data.channel);
+        //       clearInterval(timerId);
+        //       clientTimers.delete(data.clientId + "-" + data.channel);
+
+        //       const clearData = { clientId: data.clientId, targetId: data.targetId, message: `clear-${data.channel === "A" ? 1 : 2}`, type: "msg" };
+        //       target.send(JSON.stringify(clearData));
+
+        //       setTimeout(() => {
+        //         delaySendMsg(data.clientId, ws, target, sendData, totalSends, timeSpace, data.channel);
+        //       }, 150);
+        //     } else {
+        //       delaySendMsg(data.clientId, ws, target, sendData, totalSends, timeSpace, data.channel);
+        //       console.log(`通道 ${data.channel} 消息发送中，总消息数：${totalSends} 持续时间：${sendtime}`);
+        //     };
+        //   } else {
+        //     console.log(`未找到匹配的客户端，clientId: ${data.clientId}`);
+        //     const errorData = { clientId: data.clientId, targetId: data.targetId, message: "404", type: "msg" };
+        //     ws.send(JSON.stringify(errorData));
+        //   };
+        //   return;
+        // }
       });
+
       ws.on('close', () => {
         // 连接关闭时，准备清除数据
         console.log('WebSocket 连接已关闭');
@@ -214,6 +286,7 @@ function startServerInternal() {
         };
         updateStatusBar();
       });
+
       ws.on('error', (error) => {
         // 静默销毁连接
         let clientId = null;
@@ -287,7 +360,7 @@ function stopServer() {
 
   // 断开全部连接
   clients.forEach((value, key) => {
-    const data = { type: "break", clientId: key, targetId: "", message: "209" }
+    const data = { type: "break", clientId: key, targetId, message: "209" }
     value.send(JSON.stringify(data));
     value.close();
     console.log("断开与客户端" + key + "的连接：", value);
