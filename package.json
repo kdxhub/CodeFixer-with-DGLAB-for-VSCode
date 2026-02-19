@@ -42,15 +42,30 @@
         "title": "代码纠错",
         "properties": {
           "codefixer-with-dg-lab.code.side": {
-            "type": [
+            "type": "string",
+            "enum": [
               "left",
               "right",
               "bothAll",
               "bothAvg",
               "mixed"
             ],
+            "enumItemLabels": [
+              "仅左侧",
+              "仅右侧",
+              "全部",
+              "分摊",
+              "随机"
+            ],
+            "enumDescriptions": [
+              "电流仅输出到A通道。",
+              "电流仅输出到B通道。",
+              "两个通道都会输出。",
+              "两个通道都会输出指定强度的一半。",
+              "在强度叠加前进行随机，两个通道被选中的概率均等。"
+            ],
             "default": "mixed",
-            "description": "强度往哪个电极输出。其中默认值 mixed 表示随机， bothAll 表示两边同时叠加， bothAvg 表示两边均摊，其它的都是字面意思。"
+            "description": "电流往哪个电极输出。"
           },
           "codefixer-with-dg-lab.code.infoFirst": {
             "type": "number",
@@ -88,11 +103,27 @@
         "title": "终端纠错",
         "properties": {
           "codefixer-with-dg-lab.terminal.side": {
-            "type": [
+            "type": "string",
+            "enum": [
               "left",
               "right",
-              "both",
+              "bothAll",
+              "bothAvg",
               "mixed"
+            ],
+            "enumItemLabels": [
+              "仅左侧",
+              "仅右侧",
+              "全部",
+              "分摊",
+              "随机"
+            ],
+            "enumDescriptions": [
+              "电流仅输出到A通道。",
+              "电流仅输出到B通道。",
+              "两个通道都会输出。",
+              "两个通道都会输出指定强度的一半。",
+              "在强度叠加前进行随机，两个通道被选中的概率均等。"
             ],
             "default": "mixed",
             "description": "强度往哪个电极输出。其中默认值 mixed 表示随机，其它的都是字面意思。"
@@ -146,6 +177,23 @@
             "type": "integer",
             "default": 320,
             "description": "生成的二维码的大小（像素）。越大的值生成所需要的时间越长。"
+          }
+        }
+      },
+      {
+        "title": "其它",
+        "properties": {
+          "codefixer-with-dg-lab.pulse.left": {
+            "type": "string",
+            "enum": ["呼吸","潮汐","连击","快速按捏","按捏渐强","心跳节奏","压缩","节奏步伐","颗粒摩擦","渐变弹跳","波浪涟漪","雨水冲刷","变速敲击","信号灯","挑逗1","挑逗2"],
+            "default": "呼吸",
+            "description": "设置左通道波形。"
+          },
+          "codefixer-with-dg-lab.pulse.right": {
+            "type": "string",
+            "enum": ["呼吸","潮汐","连击","快速按捏","按捏渐强","心跳节奏","压缩","节奏步伐","颗粒摩擦","渐变弹跳","波浪涟漪","雨水冲刷","变速敲击","信号灯","挑逗1","挑逗2"],
+            "default": "呼吸",
+            "description": "设置右通道波形。"
           }
         }
       }
