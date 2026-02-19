@@ -1,65 +1,39 @@
-# codefixer-with-dg-lab README
+<center><h1>CodeFixer-with-DGLAB-for-VSCode</h1><p>一种基于DGLAB与碳基低速神经网络的自动纠错插件，适用于VSCode</p></center>
 
-This is the README for your extension "codefixer-with-dg-lab". After writing up a brief description, we recommend including the following sections.
+# 前言
 
-## Features
+## 概述
+本插件通过利用DGLAB的WebScoket进行基于碳基神经网络的反射学习机制的代码自动纠错。<br>
+这种纠错方案避免了使用LLM或者Agent等AI产品的胡言乱语情况，同时借助碳基神经网络的多模态能力大幅提升代码编辑效率。
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## 特点
 
-For example if there is an image subfolder under your extension project workspace:
+* 在代码出错时自动联动DGLAB
+* 借助碳基神经网络的多模态感知、害羞等思维修饰和完备的经验学习来提升代码编辑效率
+* 由于本插件也是使用VSCode编写的，所以所有有条件的开发者都可以以本项目为demo快速上手
 
-\!\[feature X\]\(images/feature-x.png\)
+### 相较于LLM或者Agent的优势
+根据身边统计法，传统的LLM或者Agent等AI用于代码纠错时，其难以使用、难以发现问题和难以解决问题。
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+但本插件由于改用碳基神经网络，完备且快速的思考链可以提供类似的纠错过程，且由于底层技术（一般称之为**HI**，*Human Intelligence*）的改进，这种过程虽然在思考链上讲流程类似，其输出产物却可成倍提升质量。
 
-## Requirements
+况且现阶段LLM和Agent与用户的互动往往停留在文字层面上，这显然不太有助于代码编辑效率的提升。
+本插件通过前文所述机制避免了这种情况的发生，因而可以提升代码编辑效率。
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### 相较于直接使用DG-LAB的优势
+由于传统的对DG-LAB的利用主要聚焦在多人联机或者单人游戏上面，这些利用往往缺乏趣味或者人手。
 
-## Extension Settings
+本项目将VSCode中的错误信息转接为DG-LAB支持的协议，可以完美解决这些问题。基于人脑的输出的不确定性和随机性，错误信息具备的宇称不守恒（？）可以为DGLAB的利用带来额外乐趣，完美解决了用户没有继承两位计算机老祖的血脉天赋的问题（？）。
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+# 提示
+**如果您不知道何谓DG-LAB，请忽略本项目。**<br>
+**如果您未满18岁，请忽略本项目。**
 
-For example:
+该文案描述均为整活用途，请勿当真。~~开发者也不知道他在写些什么。~~
 
-This extension contributes the following settings:
+# 授权与版权
+本插件以 [Apache 2.0 协议](https://github.com/kdxhub/CodeFixer-with-DGLAB-for-VSCode?tab=Apache-2.0-1-ov-file)开源。
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+在本插件的编写中，我们借鉴或使用了以下仓库的资源，对此表示鸣谢：
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* [DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/) | 自定义授权协议：非商用用途
