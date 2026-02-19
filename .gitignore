@@ -1,0 +1,29 @@
+# 依赖目录
+node_modules/
+
+# 构建输出目录（如果使用 TypeScript 或打包工具）
+out/
+dist/
+*.vsix
+
+# 环境变量文件（避免泄露敏感信息）
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS 生成的文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率报告
+coverage/
+.nyc_output/
+
+# 编译缓存
+*.tsbuildinfo
