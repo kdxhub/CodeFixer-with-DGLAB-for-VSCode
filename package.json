@@ -16,6 +16,10 @@
       {
         "command": "dglab.server.start",
         "title": "DGLAB: 开启WebScoket"
+      },
+      {
+        "command": "dglab.detail",
+        "title": "DGLAB: 显示详情信息"
       }
     ],
     "configuration": [
