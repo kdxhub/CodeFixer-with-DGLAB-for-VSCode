@@ -198,8 +198,10 @@ function startServerInternal() {
         });
 
         // 开始清除数据
-        ws.close();
         console.log("断开的client id:" + clientId);
+        const data = { type: "break", clientId, targetId: "", message: "209" }
+        ws.send(JSON.stringify(data));
+        ws.close();
         clients.delete(clientId);
         console.log("已清除" + clientId + " ,当前剩余连接数: " + clients.size);
         
@@ -285,6 +287,8 @@ function stopServer() {
 
   // 断开全部连接
   clients.forEach((value, key) => {
+    const data = { type: "break", clientId: key, targetId: "", message: "209" }
+    value.send(JSON.stringify(data));
     value.close();
     console.log("断开与客户端" + key + "的连接：", value);
   });
