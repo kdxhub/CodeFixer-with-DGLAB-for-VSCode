@@ -115,7 +115,14 @@ function switchMode() {
   }
 }
 
+var startServerLock = false;
 function startServer() {
+  console.info("触发服务器开启流程");
+  if (startServerLock)/* 异步会话锁，防止重复启动服务器 */ {
+    console.warn("异步会话锁中断了服务器开启流程");
+    return;
+  };
+  startServerLock = true;
   vscode.window.showInformationMessage(
     warnmsg,
     { modal: true },
@@ -128,6 +135,9 @@ function startServer() {
   ).then((selection) => {
     if (selection === '我已认真阅读并同意上述事项') {
       startServerInternal();
+    } else {
+      startServerLock = false;
+      console.warn("用户中断了服务器开启流程");
     }
   });
 }
@@ -291,6 +301,7 @@ function stopServer() {
   // 更新状态
   status = 0;
   power.paused = false;
+  startServerLock/* 解除会话锁 */ = false;
   updateStatusBar();
 }
 
