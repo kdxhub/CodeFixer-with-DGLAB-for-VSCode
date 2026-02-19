@@ -104,6 +104,7 @@ function TerminalErrorcodeProcessor(event, context) {
       if (invertable) {
         setTimeout(() => {
           dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+          console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
         }, duration);
       };
       break;
@@ -113,6 +114,7 @@ function TerminalErrorcodeProcessor(event, context) {
       if (invertable) {
         setTimeout(() => {
           dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
+          console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
         }, duration);
       };
       break;
@@ -123,6 +125,7 @@ function TerminalErrorcodeProcessor(event, context) {
         setTimeout(() => {
           dglab.power().right.set(1, -strength / 2 + dglab.power().right.value[1]);
           dglab.power().left.set(1, -strength / 2 + dglab.power().left.value[1]);
+          console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
         }, duration);
       };
       break;
@@ -133,6 +136,7 @@ function TerminalErrorcodeProcessor(event, context) {
         setTimeout(() => {
           dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
           dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+          console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
         }, duration);
       };
       break;
@@ -144,6 +148,7 @@ function TerminalErrorcodeProcessor(event, context) {
         if (invertable) {
           setTimeout(() => {
             dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
+            console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
           }, duration);
         };
       } else {
@@ -152,6 +157,7 @@ function TerminalErrorcodeProcessor(event, context) {
         if (invertable) {
           setTimeout(() => {
             dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+            console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
           }, duration);
         };
       };
