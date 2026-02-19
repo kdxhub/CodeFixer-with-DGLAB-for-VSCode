@@ -11,10 +11,12 @@ const dglab = require('./main.js');
 function setStrength(index, mode, value) {
   switch (mode) {
     case "left":
+      dglab.power().right.set(index, 0);
       dglab.power().left.set(index, value);
       break;
     case "right":
       dglab.power().right.set(index, value);
+      dglab.power().left.set(index, 0);
       break;
     case "bothAvg":
       dglab.power().right.set(index, value / 2);
