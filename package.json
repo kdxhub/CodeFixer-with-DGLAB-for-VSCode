@@ -1,4 +1,76 @@
 {
+  "contributes": {
+    "commands": [
+      {
+        "command": "dglab.open_config",
+        "title": "DGLAB: 打开拓展设置"
+      },
+      {
+        "command": "dglab.server.stop",
+        "title": "DGLAB: 关闭WebScoket"
+      },
+      {
+        "command": "dglab.server.pause",
+        "title": "DGLAB: 切换工作状态"
+      },
+      {
+        "command": "dglab.server.start",
+        "title": "DGLAB: 开启WebScoket"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "强度",
+        "properties": {
+          "codefixer-with-dg-lab.side": {
+            "type": ["left", "right", "both", "mixed"],
+            "default": "mixed",
+            "description": "强度往哪个电极输出。其中 mixed 表示随机，其它的都是字面意思。"
+          },
+          "codefixer-with-dg-lab.add.infoFirst": {
+            "type": "number",
+            "default": 0,
+            "description": "第一个信息增加的强度"
+          },
+          "codefixer-with-dg-lab.add.infoEvery": {
+            "type": "number",
+            "default": 0,
+            "description": "除了第一个信息以外的每个信息增加的强度"
+          },
+          "codefixer-with-dg-lab.add.warnFirst": {
+            "type": "number",
+            "default": 10,
+            "description": "第一个警告增加的强度"
+          },
+          "codefixer-with-dg-lab.add.warnEvery": {
+            "type": "number",
+            "default": 1,
+            "description": "除了第一个警告以外的每个警告增加的强度"
+          },
+          "codefixer-with-dg-lab.add.errorFirst": {
+            "type": "number",
+            "default": 20,
+            "description": "第一个错误增加的强度"
+          },
+          "codefixer-with-dg-lab.add.errorEvery": {
+            "type": "number",
+            "default": 10,
+            "description": "除了第一个错误以外的每个错误增加的强度"
+          }
+        }
+      },
+      {
+        "title": "WebScoket服务器",
+        "properties": {
+          "codefixer-with-dg-lab.server.port": {
+            "type": "number",
+            "default": 59999,
+            "description": "服务器端口"
+          }
+        }
+      }
+    ]
+  },
   "name": "codefixer-with-dg-lab",
   "displayName": "CodeFixer with DG-LAB",
   "description": "一种基于DGLAB与碳基低速神经网络的自动纠错插件",
@@ -18,15 +90,7 @@
   "activationEvents": [
     "*"
   ],
-  "main": "./src/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "dglab.open_config",
-        "title": "打开拓展设置"
-      }
-    ]
-  },
+  "main": "./src/entry.js",
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
