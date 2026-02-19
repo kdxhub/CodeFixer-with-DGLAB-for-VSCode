@@ -34,11 +34,12 @@
             "type": [
               "left",
               "right",
-              "both",
+              "bothAll",
+              "bothAvg",
               "mixed"
             ],
             "default": "mixed",
-            "description": "强度往哪个电极输出。其中默认值 mixed 表示随机，其它的都是字面意思。"
+            "description": "强度往哪个电极输出。其中默认值 mixed 表示随机， bothAll 表示两边同时叠加， bothAvg 表示两边均摊，其它的都是字面意思。"
           },
           "codefixer-with-dg-lab.code.inrevertable": {
             "type": "boolean",
