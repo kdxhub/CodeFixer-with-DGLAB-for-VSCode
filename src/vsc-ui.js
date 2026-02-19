@@ -12,18 +12,11 @@ const elements = {
         '@ext:kdxiaoyi.codefixer-with-dg-lab'
       );
     }),
-    start: vscode.commands.registerCommand('dglab.server_start', function () {
-      dglab.startServer();
-    }),
-    stop: vscode.commands.registerCommand('dglab.server.stop', function () {
-      dglab.stopServer();
-    }),
-    pause: vscode.commands.registerCommand('dglab.server.pause', function () {
-      dglab.power.pause();
-    }),
-    detail: vscode.commands.registerCommand('dglab.detail', function () {
-      dglab.switchMode();
-    }),
+    start: vscode.commands.registerCommand('dglab.server_start', dglab.startServer),
+    stop: vscode.commands.registerCommand('dglab.server.stop', dglab.stopServer),
+    pause: vscode.commands.registerCommand('dglab.server.pause', dglab.power.pause),
+    detail: vscode.commands.registerCommand('dglab.detail', dglab.switchMode),
+    update: vscode.commands.registerCommand('dglab.update', updateStatusBar),
   },
   statusBar: {
     info: vscode.window.createStatusBarItem(
@@ -49,7 +42,7 @@ function onEnable(c) {
   }
 
   // 注册右下角的信息栏
-  updateStatusBar(0, 0, 0);
+  updateStatusBar();
   elements.statusBar.info.command = "dglab.detail";
   elements.statusBar.info.show();
   context.subscriptions.push(elements.statusBar.info);
@@ -57,12 +50,9 @@ function onEnable(c) {
 
 /**
  * 更新状态栏提示
- * @param {Number} left 
- * @param {Number} right 
- * @param {Number} status 当前状态。0服务器关闭，1当前暂停，2当前工作，3未连接客户端，其它值故障
  */
-function updateStatusBar(left, right, status) {
-  switch (status) {
+function updateStatusBar() {
+  switch (dglab.getStatus()) {
     case 0:
       elements.statusBar.info.text = "$(error)DGLAB：禁用";
       elements.statusBar.info.tooltip = "当前服务器未启用。\n点按以开启。";
@@ -72,7 +62,7 @@ function updateStatusBar(left, right, status) {
       elements.statusBar.info.tooltip = "当前服务已暂停。\n点按以恢复。";
       break;
     case 2:
-      elements.statusBar.info.text = `$(heart)DGLAB ${left} | ${right}`;
+      elements.statusBar.info.text = `$(heart)DGLAB ${dglab.power.left.get()} | ${dglab.power.right.get()}`;
       elements.statusBar.info.tooltip = "当前服务正在运行。\n两侧数字代表对应方向的强度。\n点按以暂停。";
       break;
     case 3:
@@ -89,8 +79,8 @@ function updateStatusBar(left, right, status) {
 function onDisable() { }
 
 module.exports = {
-  onEnable,
-  onDisable,
-  updateStatusBar,
   elements: elements,
+  updateStatusBar: updateStatusBar,
+  onEnable: onEnable,
+  onDisable: onDisable,
 }

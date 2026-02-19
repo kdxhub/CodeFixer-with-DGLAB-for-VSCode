@@ -37,6 +37,9 @@ const strength = {
   mode: function () { return conf.get("side") },
 }
 const server = {
+  /**
+   * @returns {Number}
+   */
   port: function () { return conf.get("server.port") },
 }
 

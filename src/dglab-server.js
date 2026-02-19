@@ -1,24 +1,68 @@
 const vscode = require('vscode');
-const dglab = require('./dglab-server.js');
-const main = require('./entry.js');
+const conf = require('./config.js');
+const ui = require('./vsc-ui.js');
+const WebScoket = require('ws');
+var status = 0;
+/**
+ * @type {WebScoket.Server}
+ */
+var wsServer;
+
+/**
+ * 获取当前状态
+ * * 0 服务器关闭
+ * * 1 暂停
+ * * 2 工作
+ * * 3 未连接客户端
+ * * 其它值 故障
+ * @returns {Number}
+ */
+function getStatus() { return status; };
 
 const power = {
   left: {
-    set: function (value) { },
-    get: function () { },
+    value: 0,
+    set: function (value) { this.value = value; },
+    get: function () { return this.value; },
   },
   right: {
-    set: function (value) { },
-    get: function () { },
+    value: 0,
+    set: function (value) { this.value = value; },
+    get: function () { return this.value; },
   },
+  paused: false,
+  pause: function () { this.paused = !this.paused; },
 }
 
-function startServer() { }
+function switchMode() { }
 
-function stopServer() { }
+function startServer() {
+  let port = conf.server.port();
+  try {
+    power.paused = false;
+    wsServer = new WebScoket.Server({ port });
+  } catch (error) {
+    
+  }
+}
+
+function stopServer() {
+  if (wsServer) {
+    wsServer.close(() => {
+      status = 0;
+      ui.updateStatusBar();
+      vscode.window.showInformationMessage("WebScoket服务器已关闭");
+    });
+  } else {
+    vscode.window.showInformationMessage("尚未启动服务器");
+    ui.updateStatusBar();
+  }
+}
 
 module.exports = {
   power: power,
-  startServer: startServer,
-  stopServer: stopServer
+  startServer,
+  stopServer,
+  switchMode,
+  getStatus,
 }

@@ -27,7 +27,12 @@
         "title": "强度",
         "properties": {
           "codefixer-with-dg-lab.side": {
-            "type": ["left", "right", "both", "mixed"],
+            "type": [
+              "left",
+              "right",
+              "both",
+              "mixed"
+            ],
             "default": "mixed",
             "description": "强度往哪个电极输出。其中 mixed 表示随机，其它的都是字面意思。"
           },
@@ -101,11 +106,14 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.100.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "eslint": "^9.39.2",
+    "@types/vscode": "^1.100.0",
     "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.2"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
   }
 }
