@@ -71,10 +71,12 @@ function updateStatusBar() {
       break;
     default:
       elements.statusBar.info.text = "$(warning)DGLAB：异常";
-      elements.statusBar.info.tooltip = "当前服务出现异常，需要进一步操作。\n点按以重试。";
+      elements.statusBar.info.tooltip = "当前服务出现异常，需要进一步操作。\n点按以停止服务器。";
       break;
   }
 }
+
+function showHowToConnect(address) {}
 
 function onDisable() { }
 
@@ -83,4 +85,5 @@ module.exports = {
   updateStatusBar: updateStatusBar,
   onEnable: onEnable,
   onDisable: onDisable,
+  showHowToConnect: showHowToConnect,
 }

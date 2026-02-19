@@ -43,14 +43,34 @@ const power = {
     this.paused = !this.paused;
     if (this.paused) {
       status = 1;
+      vscode.window.showInformationMessage("已暂停服务");
     } else {
       status = (connected <= 0) ? 3 : 2;
+      vscode.window.showInformationMessage("服务恢复");
     }
     ui.updateStatusBar();
   },
 }
 
-function switchMode() { }
+function switchMode() {
+  switch (getStatus()) {
+    case 0:
+      startServer();
+      break;
+    case 1:
+      power.pause();
+      break;
+    case 2:
+      power.pause();
+      break;
+    case 3:
+      ui.showHowToConnect(conf.server.port());
+      break;
+    default:
+      stopServer();
+      break;
+  }
+}
 
 function startServer() {
   let port = conf.server.port();
