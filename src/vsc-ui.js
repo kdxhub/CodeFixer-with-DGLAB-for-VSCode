@@ -26,6 +26,7 @@ const elements = {
   },
 }
 
+// 变量
 var context;
 
 /**
@@ -75,8 +76,7 @@ function updateStatusBar() {
       break;
   }
 }
-
-function showHowToConnect(address) {}
+dglab.regisiter/* 注册回调函数 */(updateStatusBar);
 
 function onDisable() { }
 
@@ -85,5 +85,4 @@ module.exports = {
   updateStatusBar: updateStatusBar,
   onEnable: onEnable,
   onDisable: onDisable,
-  showHowToConnect: showHowToConnect,
 }

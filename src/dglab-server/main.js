@@ -1,7 +1,8 @@
 const vscode = require('vscode');
 const conf = require('../config.js');
-const ui = require('../vsc-ui.js');
 const WebScoket = require('ws');
+
+// 存储变量
 /**
  * @see {@link getStatus()}
  */
@@ -11,6 +12,12 @@ var connected = 0;
  * @type {WebScoket.Server}
  */
 var wsServer;
+
+/* 注册回调函数并保证基本能用 */
+let updateStatusBar = function () { return; } ;
+function regisiter(updateStatusBarFunc) {
+  updateStatusBar = updateStatusBarFunc;
+};
 
 /**
  * 获取当前状态
@@ -27,6 +34,7 @@ function getStatus() { return status; };
  */
 function getConnected() { return connected; };
 
+// 强度相关变量
 const power = {
   left: {
     value: 0,
@@ -48,10 +56,11 @@ const power = {
       status = (connected <= 0) ? 3 : 2;
       vscode.window.showInformationMessage("服务恢复");
     }
-    ui.updateStatusBar();
+    updateStatusBar();
   },
 }
 
+// --- 工具方法
 function switchMode() {
   switch (getStatus()) {
     case 0:
@@ -64,7 +73,6 @@ function switchMode() {
       power.pause();
       break;
     case 3:
-      ui.showHowToConnect(conf.server.port());
       break;
     default:
       stopServer();
@@ -84,14 +92,14 @@ function startServer() {
       status = 3;
       vscode.window.showInformationMessage(`WebSocket服务器已启动，端口: ${port}`);
       console.log(`成功启动WebScoket服务器 @ ws://localhost:${port}`);
-      ui.updateStatusBar();
+      updateStatusBar();
     });
 
     // 注册连接事件
     wsServer.on('connection', (ws) => {
       connected += 1;
       status = 2;
-      ui.updateStatusBar();
+      updateStatusBar();
       console.log('新客户端连接');
       ws.on('message', (data) => {
       });
@@ -104,12 +112,12 @@ function startServer() {
           vscode.window.showInformationMessage(`有客户端断开了连接，目前还有 ${connected} 台设备连接。`);
         };
         console.log('客户端连接断开');
-        ui.updateStatusBar();
+        updateStatusBar();
       });
       ws.on('error', (error) => {
         vscode.window.showWarningMessage(`有客户端请求连接但无法连接：${error.message}`);
         console.error("有客户端请求连接但无法连接：", error);
-        ui.updateStatusBar();
+        updateStatusBar();
       });
     });
 
@@ -123,13 +131,13 @@ function startServer() {
       }
       status = -1;
       console.error('WebSocket 服务器错误:', error);
-      ui.updateStatusBar();
+      updateStatusBar();
     });
   } catch (error) {
     status = -1;
     console.error("无法启动DGLAB WebScoket服务器：", error);
     vscode.window.showErrorMessage(`无法启动WebScoket服务器：${error.message}`);
-    ui.updateStatusBar();
+    updateStatusBar();
   }
 }
 
@@ -138,11 +146,11 @@ function stopServer() {
     wsServer.close(() => {
       status = 0;
       vscode.window.showInformationMessage("WebScoket服务器已关闭");
-      ui.updateStatusBar();
+      updateStatusBar();
     });
   } else {
     vscode.window.showInformationMessage("尚未启动服务器");
-    ui.updateStatusBar();
+    updateStatusBar();
   }
 }
 
@@ -154,4 +162,5 @@ module.exports = {
   getStatus,
   getConnected,
   wsServer: () => { return wsServer; },
+  regisiter,
 }
