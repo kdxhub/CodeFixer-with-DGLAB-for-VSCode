@@ -13,10 +13,31 @@ function activate(context) {
   vscode.languages.onDidChangeDiagnostics((e) => { events.EventDiagnosticProcessor(e, context); }, null, context.subscriptions);
 
   // 监听终端输出代码
-  vscode.window.onDidChangeTerminalShellIntegration(async (e) => { events.TerminalErrorcodeProcessor(e, context); }, null, context.subscriptions);
+  ensureShellIntegration();
+  vscode.window.onDidEndTerminalShellExecution((e) => { events.TerminalErrorcodeProcessor(e, context) }, null, context.subscriptions);
+  // vscode.window.onDidChangeTerminalShellIntegration(async (e) => { events.TerminalErrorcodeProcessor(e, context); }, null, context.subscriptions);
 }
 
 function deactivate() { }
+
+async function ensureShellIntegration() {
+  const config = vscode.workspace.getConfiguration('terminal.integrated');
+  const enabled = config.get('shellIntegration.enabled');
+
+  if (!enabled) {
+    // 询问用户是否要启用
+    const answer = await vscode.window.showInformationMessage(
+      '需要启用终端 Shell 集成才能处理终端命令执行结果，是否现在开启？',
+      '开启',
+      '暂不'
+    );
+
+    if (answer === '开启') {
+      await config.update('shellIntegration.enabled', true, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage('Shell 集成已启用，请重启终端');
+    }
+  }
+}
 
 module.exports = {
   activate,

@@ -88,8 +88,8 @@
           },
           "codefixer-with-dg-lab.terminal.inrevertable": {
             "type": "boolean",
-            "default": false,
-            "description": "控制强度能否下降。默认值 false 表示可以下降。\n注意此项不会影响 duration 的功能，本质上是在 duration 结束的时候取消其结束事件。"
+            "default": true,
+            "description": "控制强度能否下降。默认值 true 表示可以下降。"
           },
           "codefixer-with-dg-lab.terminal.rate": {
             "type": "number",
@@ -99,7 +99,7 @@
           "codefixer-with-dg-lab.terminal.duration": {
             "type": "number",
             "default": 3000,
-            "description": "当终端产生错误时，强度将叠加多长时间。单位毫秒"
+            "description": "当终端产生错误时，强度将叠加多长时间。单位毫秒\n如果设为 0 则禁用本功能。"
           },
           "codefixer-with-dg-lab.terminal.interruptSeeAs": {
             "type": "number",

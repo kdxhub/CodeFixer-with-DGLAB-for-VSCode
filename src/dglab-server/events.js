@@ -2,44 +2,6 @@ const vscode = require('vscode');
 const config = require('../config.js');
 const dglab = require('./main.js');
 
-/**
- * 根据配置文件自动设置值
- * @param {number} index 
- * @param {string} mode 
- * @param {number} value 
- */
-function setStrength(index, mode, value) {
-  switch (mode) {
-    case "left":
-      dglab.power().right.set(index, 0);
-      dglab.power().left.set(index, value);
-      break;
-    case "right":
-      dglab.power().right.set(index, value);
-      dglab.power().left.set(index, 0);
-      break;
-    case "bothAvg":
-      dglab.power().right.set(index, value / 2);
-      dglab.power().left.set(index, value / 2);
-      break;
-    case "bothAll":
-      dglab.power().right.set(index, value);
-      dglab.power().left.set(index, value);
-      break;
-    default:
-      // 随机一边
-      if (Math.random() <= .5) {
-        dglab.power().right.set(index, value);
-        dglab.power().left.set(index, 0);
-      } else {
-        dglab.power().right.set(index, 0);
-        dglab.power().left.set(index, value);
-      };
-      break;
-  }
-  console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
-}
-
 function EventDiagnosticProcessor(event, context) {
   // 获取当前激活的编辑器
   const editor = vscode.window.activeTextEditor;
@@ -81,28 +43,121 @@ function EventDiagnosticProcessor(event, context) {
     strength += config.code.info.first();
     strength += config.code.info.every() * (infos - 1);
   };
+
+  // 上传
   console.log("上传纠错强度：", strength);
-  setStrength(0, config.code.mode(), strength);
+  switch (config.code.mode()) {
+    case "left":
+      dglab.power().right.set(0, 0);
+      dglab.power().left.set(0, strength);
+      break;
+    case "right":
+      dglab.power().right.set(0, strength);
+      dglab.power().left.set(0, 0);
+      break;
+    case "bothAvg":
+      dglab.power().right.set(0, strength / 2);
+      dglab.power().left.set(0, strength / 2);
+      break;
+    case "bothAll":
+      dglab.power().right.set(0, strength);
+      dglab.power().left.set(0, strength);
+      break;
+    default:
+      // 随机一边
+      if (Math.random() <= .5) {
+        dglab.power().right.set(0, strength);
+        dglab.power().left.set(0, 0);
+      } else {
+        dglab.power().right.set(0, 0);
+        dglab.power().left.set(0, strength);
+      };
+      break;
+  }
+  console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
 }
 
 function TerminalErrorcodeProcessor(event, context) {
-  const { terminal, shellIntegration } = event;
-  // 监听这个终端的命令执行结束事件
-  if (shellIntegration) {
-    // 注意：这个事件在命令执行结束时触发
-    vscode.window.onDidEndTerminalShellExecution(async (execEvent) => {
-      // 获取退出码
-      const exitCode = execEvent.exitCode;
-      // 根据退出码判断执行结果
-      if (exitCode === 0) {
-        vscode.window.showInformationMessage(`命令完成，退出码: ${exitCode}`);
-      } else if (exitCode === undefined) {
-        console.log(`命令被中断（可能按了 Ctrl+C）`);
+  // 修正退出码
+  let exitCode = event.exitCode;
+  if (exitCode === undefined) {
+    exitCode = config.terminal.interrupt();
+  };
+  let rate = config.terminal.rate();
+  let duration = config.terminal.duration();
+  if (exitCode <= 0 || rate <= 0 || duration <= 0) {
+    return;
+  };
+
+  // 处理退出码
+  let strength = exitCode * config.terminal.rate();
+
+  // 上传
+  console.log("上传纠错强度：", strength);
+  const originLeft = dglab.power().left.value[1];
+  const originRight = dglab.power().right.value[1];
+  const invertable = config.terminal.inrevertable();
+  switch (config.code.mode()) {
+    case "left":
+      dglab.power().right.set(1, 0);
+      dglab.power().left.set(1, strength + originLeft);
+      if (invertable) {
+        setTimeout(() => {
+          dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+        }, duration);
+      };
+      break;
+    case "right":
+      dglab.power().right.set(1, strength + originRight);
+      dglab.power().left.set(1, 0);
+      if (invertable) {
+        setTimeout(() => {
+          dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
+        }, duration);
+      };
+      break;
+    case "bothAvg":
+      dglab.power().right.set(1, strength / 2 + originRight);
+      dglab.power().left.set(1, strength / 2 + originLeft);
+      if (invertable) {
+        setTimeout(() => {
+          dglab.power().right.set(1, -strength / 2 + dglab.power().right.value[1]);
+          dglab.power().left.set(1, -strength / 2 + dglab.power().left.value[1]);
+        }, duration);
+      };
+      break;
+    case "bothAll":
+      dglab.power().right.set(1, strength + originRight);
+      dglab.power().left.set(1, strength + originLeft);
+      if (invertable) {
+        setTimeout(() => {
+          dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
+          dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+        }, duration);
+      };
+      break;
+    default:
+      // 随机一边
+      if (Math.random() <= .5) {
+        dglab.power().right.set(1, strength + originRight);
+        dglab.power().left.set(1, 0);
+        if (invertable) {
+          setTimeout(() => {
+            dglab.power().right.set(1, -strength + dglab.power().right.value[1]);
+          }, duration);
+        };
       } else {
-        vscode.window.showErrorMessage(`命令失败，退出码: ${exitCode}`);
-      }
-    }, null, context.subscriptions);
+        dglab.power().right.set(1, 0);
+        dglab.power().left.set(1, strength + originLeft);
+        if (invertable) {
+          setTimeout(() => {
+            dglab.power().left.set(1, -strength + dglab.power().left.value[1]);
+          }, duration);
+        };
+      };
+      break;
   }
+  console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
 }
 
 module.exports = {
