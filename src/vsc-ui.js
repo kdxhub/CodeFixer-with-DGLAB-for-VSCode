@@ -26,6 +26,7 @@ const elements = {
     start: vscode.commands.registerCommand('dglab.server.start', dglab.startServer),
     stop: vscode.commands.registerCommand('dglab.server.stop', dglab.stopServer),
     pause: vscode.commands.registerCommand('dglab.server.pause', dglab.power().pause),
+    pauseForced: vscode.commands.registerCommand('dglab.server.pause.forced', dglab.power().pauseForced),
     detail: vscode.commands.registerCommand('dglab.detail', dglab.switchMode),
     update: vscode.commands.registerCommand('dglab.update', updateStatusBar),
   },

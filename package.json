@@ -1,5 +1,12 @@
 {
   "contributes": {
+    "keybindings": [
+      {
+        "command": "dglab.server.pause.forced",
+        "key": "ctrl+alt+space",
+        "mac": "cmd+alt+space"
+      }
+    ],
     "commands": [
       {
         "command": "dglab.open_config",
@@ -12,6 +19,10 @@
       {
         "command": "dglab.server.pause",
         "title": "DGLAB: 临时暂停"
+      },
+      {
+        "command": "dglab.server.pause.forced",
+        "title": "DGLAB: 紧急暂停"
       },
       {
         "command": "dglab.server.start",

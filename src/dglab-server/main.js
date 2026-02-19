@@ -42,6 +42,8 @@ const warnmsg = `欢迎使用本插件。在继续操作前，请仔细阅读以
 6. 停止条件：若您在过程中感到任何不适或无法接受当前刺激，请立即停止插件运行。
 7. 免责声明：一旦使用本插件，即表示您已知悉并自愿承担上述所有风险。VSCode著作权人、本插件作者及相关贡献者均不对因使用本插件而产生的任何后果承担任何法律责任。
 请确认您已认真阅读并理解以上内容。
+ 
+同时，请知悉：按下 APP端任意按键 或 Ctrl+Alt+空格 （MacOS请换成Cmd+Alt+空格，可修改）可以强制暂停。
 `;
 
 /* 注册回调函数并保证基本能用 */
@@ -74,6 +76,7 @@ const power = {
     value: [0, 0],
     set: function (index, value) { power.left.value[index] = value; },
     get: function () {
+      if (power.paused) { return 0; };
       let v = Math.floor(power.left.value[0] + power.left.value[1]);
       if (v >= 200) {
         return 200;
@@ -86,6 +89,7 @@ const power = {
     value: [0, 0],
     set: function (index, value) { power.right.value[index] = value; },
     get: function () {
+      if (power.paused) { return 0; };
       let v = Math.floor(power.right.value[0] + power.right.value[1]);
       if (v >= 200) {
         return 200;
@@ -105,6 +109,13 @@ const power = {
       vscode.window.showInformationMessage("服务恢复");
     }
     updateStatusBar();
+  },
+  pauseForced: function (reason) {
+    if (power.paused || status == 0) { return; };
+    power.paused = true;
+    updateStatusBar();
+    vscode.window.showInformationMessage("已自动暂停。" + reason);
+    return;
   },
 }
 
@@ -254,6 +265,11 @@ function startServerInternal() {
           const sendData = { clientId, targetId, message: "200", type: "bind" }
           ws.send(JSON.stringify(sendData));
           return;
+        };
+
+        // app上的任何按钮均视为暂停
+        if (data.type === "msg" && data.message.startsWith("feedback-") && !power.paused) {
+          power.pauseForced("APP按钮被点击。");
         };
       });
 
