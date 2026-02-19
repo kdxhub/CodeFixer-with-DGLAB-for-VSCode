@@ -67,6 +67,10 @@ const server = {
    * @returns {Number}
    */
   port: function () { return conf.get("server.port") },
+  /**
+   * @returns {String}
+   */
+  ip: function () { return conf.get("server.override_ip") },
   qrcode: {
     /**
      * @returns {Number}

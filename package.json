@@ -121,6 +121,11 @@
             "default": 59999,
             "description": "服务器端口"
           },
+          "codefixer-with-dg-lab.server.override_ip": {
+            "type": "string",
+            "default": "",
+            "description": "服务器IP，不为空将覆盖自动检测结果。\n推荐仅在必要时才使用。"
+          },
           "codefixer-with-dg-lab.server.qrcode.correctionLevel": {
             "type": ["L", "M", "Q", "H"],
             "default": "Q",

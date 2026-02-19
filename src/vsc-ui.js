@@ -91,9 +91,14 @@ function updateStatusBar() {
 
 /**
  * 显示连接方法
- * @param {String} address 传入IP,端口自动读取
+ * @param {String} ip 传入IP,端口自动读取
  */
-async function showConnect(address = "0.0.0.0") {
+async function showConnect(ip = "0.0.0.0") {
+  // 决定是否要覆写ip
+  const confIp = conf.server.ip();
+  let address = ip;
+  if (confIp) { address = confIp };
+
   // 转为二维码并保存到临时文件
   const filePath = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}`);
   if (filePath == null) { return; };
@@ -111,8 +116,11 @@ async function showConnect(address = "0.0.0.0") {
       viewColumn: vscode.ViewColumn.Active,
       preview: true  // 以预览模式打开
     });
-    vscode.window.showInformationMessage(`二维码已生成并打开，请使用同一局域网下的 DG-LAB 客户端扫码连接。\n若无法查看二维码，你可手动访问 ${filePath} 。\n识别到的IP地址为 ${address} ，若错误导致无法连接请在设置中手动覆写。`);
-
+    if (confIp) {
+      vscode.window.showInformationMessage(`二维码已生成并打开，请使用同一局域网下的 DG-LAB 客户端扫码连接。\n若无法查看二维码，你可手动访问 ${filePath} 。\nIP地址在配置文件中被覆写为 ${address} 。`);
+    } else {
+      vscode.window.showInformationMessage(`二维码已生成并打开，请使用同一局域网下的 DG-LAB 客户端扫码连接。\n若无法查看二维码，你可手动访问 ${filePath} 。\n识别到的IP地址为 ${address} ，若错误导致无法连接请在设置中手动覆写。`);
+    };
   } catch (error) {
     vscode.window.showErrorMessage(`二维码已经生成，但无法打开: ${error.message}。\n你可手动访问 ${filePath} 。`);
   }
@@ -129,7 +137,7 @@ async function generateQRCodeWithText(text) {
 
     // 创建临时文件路径（在系统临时目录下）
     const tmpDir = os.tmpdir();
-    const fileName = `qrcode-${Date.now()}.png`;
+    const fileName = `DG-LAB-QRCODE-${Date.now()}.png`;
     const filePath = path.join(tmpDir, fileName);
 
     // 生成二维码并保存为 PNG
