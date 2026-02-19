@@ -41,11 +41,6 @@
             "default": "mixed",
             "description": "强度往哪个电极输出。其中默认值 mixed 表示随机， bothAll 表示两边同时叠加， bothAvg 表示两边均摊，其它的都是字面意思。"
           },
-          "codefixer-with-dg-lab.code.inrevertable": {
-            "type": "boolean",
-            "default": false,
-            "description": "控制强度能否下降。默认值 false 表示可以下降。"
-          },
           "codefixer-with-dg-lab.code.infoFirst": {
             "type": "number",
             "default": 0,
@@ -94,17 +89,27 @@
           "codefixer-with-dg-lab.terminal.inrevertable": {
             "type": "boolean",
             "default": false,
-            "description": "控制强度能否下降。默认值 false 表示可以下降。"
+            "description": "控制强度能否下降。默认值 false 表示可以下降。\n注意此项不会影响 duration 的功能，本质上是在 duration 结束的时候取消其结束事件。"
           },
           "codefixer-with-dg-lab.terminal.rate": {
             "type": "number",
             "default": 0.5,
-            "description": "当终端产生错误时，将错误代码转换为强度的倍率。\n将 %ERRORLEVEL% 或者 $? 乘以此系数得到的值作为强度。"
+            "description": "当终端产生错误时，将错误代码转换为强度的倍率。\n将 %ERRORLEVEL% 或者 $? 乘以此系数得到的值作为强度。\n如果设为 0 则禁用本功能。"
           },
           "codefixer-with-dg-lab.terminal.duration": {
             "type": "number",
             "default": 3000,
             "description": "当终端产生错误时，强度将叠加多长时间。单位毫秒"
+          },
+          "codefixer-with-dg-lab.terminal.interruptSeeAs": {
+            "type": "number",
+            "default": 0,
+            "description": "终端命令被 Ctrl+C 等终端导致没有返回码时视作返回了多少。\n本配置是受 rate 影响之前的值。"
+          },
+          "codefixer-with-dg-lab.terminal.tips": {
+            "type": "string",
+            "default": "杂鱼～命令执行出错了哦～要狠狠电击(%strength%)惩罚一下了呢～",
+            "description": "当终端产生错误时，进行什么提示。设置为空不提示。\n可以使用的占位符： %strength% = 当前惩罚强度；%duration% = 当前惩罚时间（毫秒）。"
           }
         }
       },

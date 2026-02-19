@@ -35,10 +35,6 @@ const code = {
    * @returns {String} 工作模式
    */
   mode: function () { return conf.get("code.side") },
-  /**
-   * @returns {boolean}
-   */
-  inrevertable: function () { return conf.get("code.inrevertable") },
 }
 const terminal = {
   /**
@@ -57,6 +53,14 @@ const terminal = {
    * @returns {number}
    */
   duration: function () { return conf.get("terminal.duration") },
+  /**
+   * @returns {number}
+   */
+  interrupt: function () { return conf.get("terminal.interruptSeeAs") },
+  /**
+   * @returns {String}
+   */
+  tips: function () { return conf.get("terminal.tips") },
 }
 const server = {
   /**
