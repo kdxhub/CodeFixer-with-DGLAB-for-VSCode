@@ -38,18 +38,18 @@ function getConnected() { return connected; };
 const power = {
   left: {
     value: 0,
-    set: function (value) { this.value = value; },
-    get: function () { return this.value; },
+    set: function (value) { power.value = value; },
+    get: function () { return power.value; },
   },
   right: {
     value: 0,
-    set: function (value) { this.value = value; },
-    get: function () { return this.value; },
+    set: function (value) { power.value = value; },
+    get: function () { return power.value; },
   },
   paused: false,
   pause: function () {
-    this.paused = !this.paused;
-    if (this.paused) {
+    power.paused = !power.paused;
+    if (power.paused == true) {
       status = 1;
       vscode.window.showInformationMessage("已暂停服务");
     } else {
@@ -98,7 +98,7 @@ function startServer() {
     // 注册连接事件
     wsServer.on('connection', (ws) => {
       connected += 1;
-      status = 2;
+      if (!power.paused) { status = 2; };
       updateStatusBar();
       console.log('新客户端连接');
       ws.on('message', (data) => {
@@ -106,7 +106,8 @@ function startServer() {
       ws.on('close', () => {
         connected -= 1;
         if (connected <= 0) {
-          status = 3;
+          if (!power.paused) { status = 3; };
+          connected = 0;
           vscode.window.showInformationMessage("当前所有客户端已断开连接。");
         } else {
           vscode.window.showInformationMessage(`有客户端断开了连接，目前还有 ${connected} 台设备连接。`);
@@ -144,7 +145,6 @@ function startServer() {
 function stopServer() {
   if (wsServer) {
     wsServer.close(() => {
-      status = 0;
       vscode.window.showInformationMessage("WebScoket服务器已关闭");
       updateStatusBar();
     });
@@ -152,6 +152,8 @@ function stopServer() {
     vscode.window.showInformationMessage("尚未启动服务器");
     updateStatusBar();
   }
+  status = 0;
+  power.paused = false;
 }
 
 module.exports = {

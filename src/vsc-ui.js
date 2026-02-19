@@ -53,6 +53,7 @@ function onEnable(c) {
  * 更新状态栏提示
  */
 function updateStatusBar() {
+  console.log(`触发状态栏刷新动作，当前状态为：`, dglab.getStatus());
   switch (dglab.getStatus()) {
     case 0:
       elements.statusBar.info.text = "$(error)DGLAB：禁用";
@@ -60,7 +61,7 @@ function updateStatusBar() {
       break;
     case 1:
       elements.statusBar.info.text = "$(stop-circle)DGLAB：暂停";
-      elements.statusBar.info.tooltip = "当前服务已暂停。\n点按以恢复。";
+      elements.statusBar.info.tooltip = "当前服务已暂停，已连接${dglab.getConnected()}台客户端。\n点按以恢复。";
       break;
     case 2:
       elements.statusBar.info.text = `$(heart)DGLAB ${dglab.power().left.get()} | ${dglab.power().right.get()}`;
