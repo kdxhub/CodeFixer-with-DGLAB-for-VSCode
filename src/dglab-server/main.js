@@ -194,13 +194,13 @@ function distributePunishment() {
       "type": "msg",
       "clientId": clientId,
       "targetId": targetId,
-      "message": `pulse-A:${conf.pulse.left.getData()}`
+      "message": "pulse-A:" + conf.pulse.left.getData()
     });
     client.send({
       "type": "msg",
       "clientId": clientId,
       "targetId": targetId,
-      "message": `pulse-B:${conf.pulse.right.getData()}`
+      "message": "pulse-B:" + conf.pulse.right.getData()
     });
   });
 };
@@ -237,13 +237,11 @@ function startServerInternal() {
 
     // 注册连接事件
     wss.on('connection', (ws) => {
-      // 存储连接并更新显示
+      // 存储连接
       const clientId = uuidv4();
       console.log('新的 WebSocket 连接已建立，标识符为:', clientId);
       clients.set(clientId, ws);
-      if (!power.paused/* 暂停时不更新状态 */) { status = 2; };
-      updateStatusBar();
- 
+
       // 握手
       ws.send(JSON.stringify({ type: 'bind', clientId, message: 'targetId', targetId: '' }));
 
@@ -262,8 +260,6 @@ function startServerInternal() {
           ws.send(JSON.stringify({ type: 'msg', clientId: "", targetId: "", message: /* 虽然403是无权限，但官方文档是这么写的 */'403' }));
           return;
         };
-        // 文档定义了这个消息体，保留但忽略
-        // const { clientId, targetId, message, type } = data;
 
         // 非法消息来源拒绝
         if (clients.get(data.clientId) !== ws && clients.get(data.targetId) !== ws) {
@@ -274,8 +270,13 @@ function startServerInternal() {
 
         // 申请绑定
         if (data.type === "bind") {
+          console.log("正在处理申请绑定");
           const sendData = { clientId, targetId, message: "200", type: "bind" }
           ws.send(JSON.stringify(sendData));
+
+          // 更新显示
+          if (!power.paused/* 暂停时不更新状态 */) { status = 2; };
+          updateStatusBar();
           return;
         };
 

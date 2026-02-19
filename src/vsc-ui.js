@@ -66,7 +66,6 @@ function onEnable(c) {
  */
 function updateStatusBar() {
   console.log(`触发状态栏刷新动作，当前状态为：`, dglab.getStatus());
-  dglab.distributePunishment();
   switch (dglab.getStatus()) {
     case 0:
       elements.statusBar.info.text = "$(error)DGLAB：禁用";
@@ -88,7 +87,8 @@ function updateStatusBar() {
       elements.statusBar.info.text = "$(warning)DGLAB：异常";
       elements.statusBar.info.tooltip = "当前服务出现异常，需要进一步操作。\n点按以停止服务器。";
       break;
-  }
+  };
+  dglab.distributePunishment();
 }
 
 /**
