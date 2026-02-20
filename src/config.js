@@ -5,47 +5,51 @@ const os = require('os');
 let conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
 function onChangedConfig() { conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab"); };
 
+function getConf() {
+  return vscode.workspace.getConfiguration("codefixer-with-dg-lab");
+}
+
 const code = {
   info: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("code.infoFirst") },
+    first: function () { return getConf().get("code.infoFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("code.infoEvery") },
+    every: function () { return getConf().get("code.infoEvery") },
   },
   warn: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("code.warnFirst") },
+    first: function () { return getConf().get("code.warnFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("code.warnEvery") },
+    every: function () { return getConf().get("code.warnEvery") },
   },
   error: {
     /**
      * @returns {Number}
      */
-    first: function () { return conf.get("code.errorFirst") },
+    first: function () { return getConf().get("code.errorFirst") },
     /**
      * @returns {Number}
      */
-    every: function () { return conf.get("code.errorEvery") },
+    every: function () { return getConf().get("code.errorEvery") },
   },
   /**
    * @returns {String} 工作模式
    */
-  mode: function () { return conf.get("code.side") },
+  mode: function () { return getConf().get("code.side") },
 }
 const terminal = {
   /**
    * @returns {String} 工作模式
    */
-  mode: function () { return conf.get("terminal.side") },
+  mode: function () { return getConf().get("terminal.side") },
   /**
    * @returns {boolean}
    */
@@ -53,47 +57,47 @@ const terminal = {
   /**
    * @returns {number}
    */
-  rate: function () { return conf.get("terminal.rate") },
+  rate: function () { return getConf().get("terminal.rate") },
   /**
    * @returns {number}
    */
-  duration: function () { return conf.get("terminal.duration") },
+  duration: function () { return getConf().get("terminal.duration") },
   /**
    * @returns {number}
    */
-  interrupt: function () { return conf.get("terminal.interruptSeeAs") },
+  interrupt: function () { return getConf().get("terminal.interruptSeeAs") },
   /**
    * @returns {String}
    */
-  tips: function () { return conf.get("terminal.tips") },
+  tips: function () { return getConf().get("terminal.tips") },
 }
 const server = {
   /**
    * @returns {Number}
    */
-  port: function () { return conf.get("server.port") },
+  port: function () { return getConf().get("server.port") },
   /**
    * @returns {String}
    */
-  ip: function () { return conf.get("server.override_ip") },
+  ip: function () { return getConf().get("server.override_ip") },
   qrcode: {
     /**
      * @returns {Number}
      */
-    size: function () { return conf.get("server.qrcode.size") },
+    size: function () { return getConf().get("server.qrcode.size") },
     /**
      * @returns {String}
      */
-    correctlevel: function () { return conf.get("server.qrcode.correctionLevel") },
+    correctlevel: function () { return getConf().get("server.qrcode.correctionLevel") },
   }
 }
 const pulse = {
   left: {
-    get: function () { return conf.get("pulse.left"); },
+    get: function () { return getConf().get("pulse.left"); },
     getData: function () { return pulseHelper.get(pulse.left.get()); },
   },
   right: {
-    get: function () { return conf.get("pulse.right") },
+    get: function () { return getConf().get("pulse.right") },
     getData: function () { return pulseHelper.get(pulse.right.get()); },
   }
 }
