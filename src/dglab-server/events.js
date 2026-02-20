@@ -3,7 +3,7 @@ const config = require('../config.js');
 const dglab = require('./main.js');
 const ui = require('../vsc-ui.js');
 
-function EventDiagnosticProcessor(event, context) {
+function EventDiagnosticProcessor(context) {
   // 获取当前激活的编辑器
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
