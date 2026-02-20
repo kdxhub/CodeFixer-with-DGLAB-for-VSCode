@@ -95,11 +95,18 @@ function updateStatusBar() {
  * 显示连接方法
  * @param {String} ip 传入IP,端口自动读取
  */
-async function showConnect(ip = "0.0.0.0") {
+async function showConnect(ip = conf.getLocalIp()) {
   // 决定是否要覆写ip
   const confIp = conf.server.ip();
   let address = ip;
   if (confIp) { address = confIp };
+
+  // 如果没有有效ip
+  if (!address) {
+    vscode.window.showErrorMessage("无法获取本地IP地址，请在设置中手动覆写。");
+    vscode.commands.executeCommand("workbench.action.openSettings", "@ext:kdxiaoyi.codefixer-with-dg-lab server.override_ip");
+    return;
+  };
 
   // 转为二维码并保存到临时文件
   const filePathPromise = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}/${dglab.serverId}`);

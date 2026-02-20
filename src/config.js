@@ -1,6 +1,8 @@
 const vscode = require("vscode");
 const pulseHelper = require('./dglab-server/getpluse.js');
 const conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
+const os = require('os');
+
 const code = {
   info: {
     /**
@@ -94,9 +96,34 @@ const pulse = {
   }
 }
 
+/**
+ * 寻找一个有效的本地IP地址
+ * @returns {String|null}
+ */
+function getLocalIp() {
+  try {
+    const interfaces = os.networkInterfaces();
+    for (const interfaceName in interfaces) {
+      const iface = interfaces[interfaceName];
+      for (let i = 0; i < iface.length; i++) {
+        const alias = iface[i];
+        if (/* alias.family === 'IPv4' &&  */!alias.internal) {
+          return alias.address;
+        };
+      };
+    };
+    throw new Error("没有找到可用的IP");
+  } catch (error) {
+    console.error("无法自动搜索本地IP：", error);
+    return null;  // 没找到返回 null
+  };
+};
+
+
 module.exports = {
   code: code,
   terminal: terminal,
   server: server,
   pulse: pulse,
+  getLocalIp,
 }

@@ -79,22 +79,22 @@
           },
           "codefixer-with-dg-lab.code.warnFirst": {
             "type": "number",
-            "default": 10,
+            "default": 5,
             "description": "第一个警告增加的强度"
           },
           "codefixer-with-dg-lab.code.warnEvery": {
             "type": "number",
-            "default": 1,
+            "default": 3,
             "description": "除了第一个警告以外的每个警告增加的强度"
           },
           "codefixer-with-dg-lab.code.errorFirst": {
             "type": "number",
-            "default": 20,
+            "default": 15,
             "description": "第一个错误增加的强度"
           },
           "codefixer-with-dg-lab.code.errorEvery": {
             "type": "number",
-            "default": 10,
+            "default": 8,
             "description": "除了第一个错误以外的每个错误增加的强度"
           }
         }
@@ -150,7 +150,7 @@
           },
           "codefixer-with-dg-lab.terminal.tips": {
             "type": "string",
-            "default": "杂鱼～命令执行出错了哦～要狠狠电击(%strength%)惩罚一下了呢～",
+            "default": "杂鱼～命令执行出错了哦～要狠狠电击惩罚一下了呢，再加%strength%档～～",
             "description": "当终端产生错误时，进行什么提示。设置为空不提示。\n可以使用的占位符： %strength% = 当前惩罚强度；%duration% = 当前惩罚时间（毫秒）。"
           }
         }
