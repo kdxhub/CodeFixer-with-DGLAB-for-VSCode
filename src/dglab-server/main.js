@@ -193,7 +193,19 @@ function distributePunishment() {
       "targetId": appId,
       "message": `strength-2+2+${power.right.get()}`,
     }));
-    // 波形
+    // 波形（先清除再下发）
+    client.send(JSON.stringify({
+      "type": "msg",
+      "clientId": serverId,
+      "targetId": appId,
+      "message": "clear-A",
+    }));
+    client.send(JSON.stringify({
+      "type": "msg",
+      "clientId": serverId,
+      "targetId": appId,
+      "message": "clear-B",
+    }));
     client.send(JSON.stringify({
       "type": "msg",
       "clientId": serverId,
