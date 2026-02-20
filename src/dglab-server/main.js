@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const WebScoket = require('ws');
+const WebSocket = require('ws');
 const conf = require('../config.js');
 const { v4: uuidv4 } = require('uuid');
 
@@ -7,16 +7,18 @@ const { v4: uuidv4 } = require('uuid');
 /**
  * @see {@link getStatus()}
  */
-var status = 0;
+var status = 0; // 0: 服务器关闭, 1: 暂停, 2: 工作中(有已绑定的APP), 3: 无APP连接
 /**
- * @type {WebScoket.Server}
+ * @type {WebSocket.Server}
  */
 var wss;
-/** 储存已连接的用户及其标识 */
-const clients = new Map();
-/** 存储客户端和发送计时器关系 */
+/** 储存所有已连接的客户端（包括已绑定和未绑定的） */
+const allClients = new Map(); // key: clientId, value: WebSocket
+/** 储存已绑定的客户端（即已经完成 bind 的 APP） */
+const boundClients = new Map(); // key: clientId (APP), value: WebSocket
+/** 存储客户端和发送计时器关系（保留原功能，未使用） */
 const clientTimers = new Map();
-/** 心跳消息 */
+/** 心跳消息模板 */
 const heartbeatMsg = {
   type: "heartbeat",
   clientId: "",
@@ -29,7 +31,7 @@ const heartbeatMsg = {
  */
 let heartbeatInterval = null;
 /**
- * 由于本插件既有服务器又有前端功能，所以实际上所有客户端都因绑定到一个固定的uuid上
+ * 插件自身的固定 ID，用于模拟前端（控制端）
  */
 const targetId = "c87d4640-17f3-4e23-862c-4f6ef7c550dd";
 /** 警告信息文本 */
@@ -47,8 +49,8 @@ const warnmsg = `欢迎使用本插件。在继续操作前，请仔细阅读以
 `;
 
 /* 注册回调函数并保证基本能用 */
-let updateStatusBar = function () { return; } ;
-let showConnect = function (param1) { return; } ;
+let updateStatusBar = function () { return; };
+let showConnect = function (param1) { return; };
 function regisiter(updateStatusBarFunc, showConnectFunc) {
   updateStatusBar = updateStatusBarFunc;
   showConnect = showConnectFunc;
@@ -58,18 +60,20 @@ function regisiter(updateStatusBarFunc, showConnectFunc) {
  * 获取当前状态
  * * 0 服务器关闭
  * * 1 暂停
- * * 2 工作
- * * 3 未连接客户端
+ * * 2 工作（至少有一个已绑定的APP）
+ * * 3 服务器运行但无已绑定的APP
  * * 其它值 故障
  * @returns {Number}
  */
 function getStatus() { return status; };
+
 /**
+ * 获取已绑定的客户端数量
  * @returns {Number}
  */
-function getConnected() { return clients.size; };
+function getConnected() { return boundClients.size; };
 
-// 强度相关变量
+// 强度相关变量（保持不变）
 const power = {
   left: {
     // 第一个表示代码纠错，第二个表示终端纠错
@@ -105,7 +109,7 @@ const power = {
       status = 1;
       vscode.window.showInformationMessage("已暂停服务");
     } else {
-      status = (getConnected() <= 0) ? 3 : 2;
+      status = (boundClients.size <= 0) ? 3 : 2;
       vscode.window.showInformationMessage("服务恢复");
     }
     updateStatusBar();
@@ -117,7 +121,7 @@ const power = {
     vscode.window.showInformationMessage("已自动暂停。" + reason);
     return;
   },
-}
+};
 
 // --- 工具方法
 function switchMode() {
@@ -143,7 +147,7 @@ function switchMode() {
 var startServerLock = false;
 function startServer() {
   console.info("触发服务器开启流程");
-  if (startServerLock)/* 异步会话锁，防止重复启动服务器 */ {
+  if (startServerLock) {
     console.warn("异步会话锁中断了服务器开启流程");
     return;
   };
@@ -168,40 +172,42 @@ function startServer() {
 };
 
 /** 
- * 立即下发强度配置
- * @apinote 正常情况下，更新强度后手动调用 vsc_ui.js 的 updateStatusBar() ，其会自动调用本方法。
- * @apinote 每隔60秒心跳包下发时也会自动下发配置。
+ * 立即下发强度配置和波形数据给所有已绑定的 APP
+ * @apinote 更新强度后手动调用 vsc_ui.js 的 updateStatusBar()，其会自动调用本方法。
+ * @apinote 每隔60秒心跳包下发时也会自动调用本方法。
  */
 function distributePunishment() {
-  if (getConnected() <= 0) { return; };
+  if (boundClients.size <= 0) { return; };
   console.log("正在下发强度配置");
 
-  // 遍历每个客户端，发送配置包
-  clients.forEach((client, clientId) => {
-    client.send({
+  // 遍历每个已绑定的客户端，发送配置包
+  boundClients.forEach((client, appId) => {
+    // 强度指令
+    client.send(JSON.stringify({
       "type": "msg",
-      "clientId": clientId,
-      "targetId": targetId,
+      "clientId": targetId,        // 发送方为插件自身
+      "targetId": appId,           // 接收方为 APP 的 ID
       "message": `strength-1+2+${power.left.get()}`,
-    });
-    client.send({
+    }));
+    client.send(JSON.stringify({
       "type": "msg",
-      "clientId": clientId,
-      "targetId": targetId,
+      "clientId": targetId,
+      "targetId": appId,
       "message": `strength-2+2+${power.right.get()}`,
-    });
-    client.send({
+    }));
+    // 波形
+    client.send(JSON.stringify({
       "type": "msg",
-      "clientId": clientId,
-      "targetId": targetId,
-      "message": "pulse-A:" + conf.pulse.left.getData()
-    });
-    client.send({
+      "clientId": targetId,
+      "targetId": appId,
+      "message": "pulse-A:" + conf.pulse.left.getData(),
+    }));
+    client.send(JSON.stringify({
       "type": "msg",
-      "clientId": clientId,
-      "targetId": targetId,
-      "message": "pulse-B:" + conf.pulse.right.getData()
-    });
+      "clientId": targetId,
+      "targetId": appId,
+      "message": "pulse-B:" + conf.pulse.right.getData(),
+    }));
   });
 };
 
@@ -209,132 +215,160 @@ function startServerInternal() {
   let port = conf.server.port();
   try {
     power.paused = false;
-    wss = new WebScoket.Server({ port });
+    wss = new WebSocket.Server({ port });
 
     // 启动成功
     wss.on('listening', () => {
-      status = 3;
+      status = 3; // 服务器运行但无绑定
       vscode.window.showInformationMessage(`WebSocket服务器已启动，端口: ${port}`);
-      console.log(`成功启动WebScoket服务器 @ ws://localhost:${port}`);
+      console.log(`成功启动WebSocket服务器 @ ws://localhost:${port}`);
       updateStatusBar();
     });
 
     // 启动心跳定时器
     if (!heartbeatInterval) {
       heartbeatInterval = setInterval(() => {
-        // 遍历 clients Map（大于0个链接），向每个客户端发送心跳消息
-        if (getConnected() > 0) {
-          console.log("向 ",getConnected(), ' 个客户端发送心跳消息：' + new Date().toLocaleString());
-          clients.forEach((client, clientId) => {
-            heartbeatMsg.clientId = clientId;
-            heartbeatMsg.targetId = targetId;
-            client.send(JSON.stringify(heartbeatMsg));
+        // 向所有已连接的客户端发送心跳消息（包括未绑定的）
+        if (allClients.size > 0) {
+          console.log("向 ", allClients.size, ' 个客户端发送心跳消息：' + new Date().toLocaleString());
+          allClients.forEach((client, clientId) => {
+            let msg = {
+              ...heartbeatMsg,
+              clientId: clientId,
+              targetId: targetId
+            };
+            client.send(JSON.stringify(msg));
           });
+          // 心跳时顺便下发强度和波形（保持原有行为）
           distributePunishment();
         };
-      }, 60 * 1000); // 每分钟发送一次心跳消息
+      }, 60 * 1000);
     };
 
     // 注册连接事件
     wss.on('connection', (ws) => {
-      // 存储连接
+      // 为新连接分配唯一 ID
       const clientId = uuidv4();
       console.log('新的 WebSocket 连接已建立，标识符为:', clientId);
-      clients.set(clientId, ws);
+      allClients.set(clientId, ws);
 
-      // 握手
-      ws.send(JSON.stringify({ type: 'bind', clientId, message: 'targetId', targetId: '' }));
+      // 发送 bind 消息，告知其自己的 ID
+      ws.send(JSON.stringify({
+        type: 'bind',
+        clientId: clientId,
+        targetId: '',
+        message: 'targetId'
+      }));
 
       // 确立后续协议
       ws.on('message', (ev) => {
-        // 收到消息时开始解析
         const id = `#${Math.floor(Math.random() * 1e6)}`;
         console.log(`收到消息${id} ：` + ev);
         let data = null;
         try {
-          // @ts-ignore
-          data = JSON.parse(ev);
+          data = JSON.parse(ev.toString());
         } catch (e) {
-          // 非JSON数据处理
           console.warn(`消息${id} 无效：`, e);
-          ws.send(JSON.stringify({ type: 'msg', clientId: "", targetId: "", message: /* 虽然403是无权限，但官方文档是这么写的 */'403' }));
+          ws.send(JSON.stringify({
+            type: 'msg',
+            clientId: "",
+            targetId: "",
+            message: '403'  // 非标准 JSON
+          }));
           return;
         };
 
-        // 非法消息来源拒绝
-        if (clients.get(data.clientId) !== ws && clients.get(data.targetId) !== ws) {
-          console.warn(`消息${id} 无效，其来源不正确。`);
-          ws.send(JSON.stringify({ type: 'msg', clientId: "", targetId: "", message: /* 同理与文档保持一致 */'404' }));
+        // 检查消息来源是否合法（必须与存储的连接匹配）
+        if (allClients.get(data.clientId) !== ws) {
+          console.warn(`消息${id} 无效，来源不正确。`);
+          ws.send(JSON.stringify({
+            type: 'msg',
+            clientId: "",
+            targetId: "",
+            message: '404'
+          }));
           return;
         };
 
-        // 申请绑定
+        // 处理绑定请求（APP 请求与控制端绑定）
         if (data.type === "bind") {
-          console.log("正在处理申请绑定");
-          const sendData = { clientId, targetId, message: "200", type: "bind" }
-          ws.send(JSON.stringify(sendData));
-
-          // 更新显示
-          if (!power.paused/* 暂停时不更新状态 */) { status = 2; };
-          updateStatusBar();
+          console.log("正在处理绑定请求");
+          if (data.message === "DGLAB") {
+            // APP 请求绑定到固定 targetId
+            // 将当前连接标记为已绑定
+            boundClients.set(data.clientId, ws);
+            // 回复绑定成功
+            ws.send(JSON.stringify({
+              type: 'bind',
+              clientId: data.clientId,
+              targetId: targetId,
+              message: '200'
+            }));
+            // 更新状态
+            if (!power.paused) {
+              status = 2;
+            }
+            updateStatusBar();
+            console.log(`绑定成功：APP ${data.clientId} 已绑定到控制端 ${targetId}`);
+          } else {
+            // 可能是初次连接后的 ID 确认，忽略
+            // 但也可以回复错误
+          }
           return;
         };
 
-        // app上的任何按钮均视为暂停
+        // 处理 APP 反馈消息（任何按钮按下视为暂停）
         if (data.type === "msg" && data.message.startsWith("feedback-") && !power.paused) {
           power.pauseForced("APP按钮被点击。");
-        };
+        }
+
+        // 其他消息可以按需处理，此处暂时忽略
       });
 
       ws.on('close', () => {
-        // 连接关闭时，准备清除数据
         console.log('WebSocket 连接已关闭');
-        let clientId = '';
-        clients.forEach((value, key) => {// 遍历 clients Map，找到并删除对应的 clientId 条目
-          if (value === ws) {
-            // 拿到断开的客户端id
-            clientId = key;
-          };
-        });
+        // 从所有存储中移除
+        let closedClientId = null;
+        for (let [id, client] of allClients.entries()) {
+          if (client === ws) {
+            closedClientId = id;
+            allClients.delete(id);
+            break;
+          }
+        }
+        if (closedClientId) {
+          boundClients.delete(closedClientId);
+          console.log("已清除client " + closedClientId + "，当前剩余连接数: " + allClients.size + "，已绑定数: " + boundClients.size);
+        }
 
-        // 开始清除数据
-        console.log("断开的client id:" + clientId);
-        const data = { type: "break", clientId, targetId: "", message: "209" }
-        ws.send(JSON.stringify(data));
-        ws.close();
-        clients.delete(clientId);
-        console.log("已清除" + clientId + " ,当前剩余连接数: " + clients.size);
-        
-        // 更新信息
-        if (getConnected() <= 0) {
-          if (!power.paused) { status = 3; };
-          vscode.window.showInformationMessage("当前所有客户端已断开连接。");
+        // 更新状态
+        if (boundClients.size <= 0) {
+          if (!power.paused) { status = 3; }
+          vscode.window.showInformationMessage("当前没有已绑定的APP。");
         } else {
-          vscode.window.showInformationMessage(`有客户端断开了连接，目前还有 ${getConnected()} 台设备连接。`);
-        };
+          vscode.window.showInformationMessage(`有客户端断开连接，目前还有 ${boundClients.size} 台设备已绑定。`);
+        }
         updateStatusBar();
       });
 
       ws.on('error', (error) => {
-        // 静默销毁连接
-        let clientId = null;
-        for (const [key, value] of clients.entries()) {
-          if (value === ws) {
-            clientId = key;
-            clients.delete(clientId);
-            console.log("已清除" + clientId + " ,当前剩余连接数: " + clients.size);
+        console.error("WebSocket 连接错误：", error);
+        // 尝试清理
+        let errClientId = null;
+        for (let [id, client] of allClients.entries()) {
+          if (client === ws) {
+            errClientId = id;
+            allClients.delete(id);
+            boundClients.delete(id);
             break;
-          };
-        };
-
-        // 更新信息
-        vscode.window.showWarningMessage(`有客户端请求连接但无法连接：${error.message}`);
-        console.error("有客户端请求连接但无法连接：", error);
+          }
+        }
+        vscode.window.showWarningMessage(`客户端连接错误：${error.message}`);
         updateStatusBar();
       });
     });
 
-    // 注册错误处理
+    // 注册服务器错误处理
     wss.on('error', (error) => {
       // @ts-ignore
       if (error.code === 'EADDRINUSE') {
@@ -348,36 +382,9 @@ function startServerInternal() {
     });
   } catch (error) {
     status = -1;
-    console.error("无法启动DGLAB WebScoket服务器：", error);
-    vscode.window.showErrorMessage(`无法启动WebScoket服务器：${error.message}`);
+    console.error("无法启动DGLAB WebSocket服务器：", error);
+    vscode.window.showErrorMessage(`无法启动WebSocket服务器：${error.message}`);
     updateStatusBar();
-  }
-}
-
-function delaySendMsg(clientId, client, target, sendData, totalSends, timeSpace, channel) {
-  // 发信计时器 通道会分别发送不同的消息和不同的数量 必须等全部发送完才会取消这个消息 新消息可以覆盖
-  target.send(JSON.stringify(sendData)); //立即发送一次通道的消息
-  totalSends--;
-  if (totalSends > 0) {
-    return new Promise((resolve, reject) => {
-      // 按频率发送消息给特定的客户端
-      const timerId = setInterval(() => {
-        if (totalSends > 0) {
-          target.send(JSON.stringify(sendData));
-          totalSends--;
-        }
-        // 如果达到发送次数上限，则停止定时器
-        if (totalSends <= 0) {
-          clearInterval(timerId);
-          client.send("发送完毕")
-          clientTimers.delete(clientId); // 删除对应的定时器
-          resolve();
-        }
-      }, timeSpace); // 每隔频率倒数触发一次定时器
-
-      // 存储clientId与其对应的timerId和通道
-      clientTimers.set(clientId + "-" + channel, timerId);
-    });
   }
 }
 
@@ -387,17 +394,19 @@ function stopServer() {
   heartbeatInterval = null;
 
   // 断开全部连接
-  clients.forEach((value, key) => {
-    const data = { type: "break", clientId: key, targetId, message: "209" }
-    value.send(JSON.stringify(data));
-    value.close();
-    console.log("断开与客户端" + key + "的连接：", value);
+  allClients.forEach((client, clientId) => {
+    const data = { type: "break", clientId: clientId, targetId: targetId, message: "209" };
+    client.send(JSON.stringify(data));
+    client.close();
+    console.log("断开与客户端" + clientId + "的连接：", client);
   });
+  allClients.clear();
+  boundClients.clear();
 
   // 关闭服务器
   if (wss) {
     wss.close(() => {
-      vscode.window.showInformationMessage("WebScoket服务器已关闭");
+      vscode.window.showInformationMessage("WebSocket服务器已关闭");
     });
   } else {
     vscode.window.showInformationMessage("尚未启动服务器");
@@ -406,7 +415,7 @@ function stopServer() {
   // 更新状态
   status = 0;
   power.paused = false;
-  startServerLock/* 解除会话锁 */ = false;
+  startServerLock = false;
   updateStatusBar();
 }
 
@@ -420,4 +429,4 @@ module.exports = {
   getConnected,
   wsServer: () => { return wss; },
   regisiter,
-}
+};
