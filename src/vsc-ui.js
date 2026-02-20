@@ -70,22 +70,27 @@ function updateStatusBar() {
     case 0:
       elements.statusBar.info.text = "$(error)DGLAB：禁用";
       elements.statusBar.info.tooltip = "当前服务器未启用。\n点按以开启。";
+      elements.statusBar.backgroundColor = undefined;
       break;
     case 1:
       elements.statusBar.info.text = "$(stop-circle)DGLAB：暂停";
       elements.statusBar.info.tooltip = `当前服务已暂停，已连接${dglab.getConnected()}台客户端。\n点按以恢复。`;
+      elements.statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
       break;
     case 2:
       elements.statusBar.info.text = `$(heart)DGLAB：${dglab.power().left.get()} | ${dglab.power().right.get()}`;
       elements.statusBar.info.tooltip = `当前服务正在运行，已连接${dglab.getConnected()}台客户端。\n两侧数字代表对应方向的强度。\n点按以暂停。`;
+      elements.statusBar.backgroundColor = undefined;
       break;
     case 3:
-      elements.statusBar.info.text = `$(warning)DGLAB：等待连接`;
+      elements.statusBar.info.text = `$(debug-disconnect)DGLAB：等待连接`;
       elements.statusBar.info.tooltip = "当前服务正在运行，但没有客户端连接。\n点按以连接。";
+      elements.statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
       break;
     default:
       elements.statusBar.info.text = "$(warning)DGLAB：异常";
       elements.statusBar.info.tooltip = "当前服务出现异常，需要进一步操作。\n点按以停止服务器。";
+      elements.statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
       break;
   };
   dglab.distributePunishment();
