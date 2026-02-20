@@ -2,11 +2,19 @@ const vscode = require('vscode');
 const ui = require('./vsc-ui.js');
 const dglab = require('./dglab-server/main.js');
 const events = require('./dglab-server/events.js');
+const config = require('./config.js');
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+  // 监听配置改变
+  vscode.workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration('codefixer-with-dg-lab')) {
+      console.log('配置已更新');
+      config.onChangedConfig();
+    }
+  });
   // 注册UI
   ui.onEnable(context);
 

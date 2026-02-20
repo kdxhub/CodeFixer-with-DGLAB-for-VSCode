@@ -1,7 +1,9 @@
 const vscode = require("vscode");
 const pulseHelper = require('./dglab-server/getpluse.js');
-const conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
 const os = require('os');
+
+let conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab");
+function onChangedConfig() { conf = vscode.workspace.getConfiguration("codefixer-with-dg-lab"); };
 
 const code = {
   info: {
@@ -47,7 +49,7 @@ const terminal = {
   /**
    * @returns {boolean}
    */
-  inrevertable: function () { return conf.get("terminal.side") },
+  inrevertable: function () { return conf.get("terminal.inrevertable") },
   /**
    * @returns {number}
    */
@@ -126,4 +128,5 @@ module.exports = {
   server: server,
   pulse: pulse,
   getLocalIp,
+  onChangedConfig,
 }
