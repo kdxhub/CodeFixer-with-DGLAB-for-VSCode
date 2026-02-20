@@ -19,6 +19,10 @@ const code = {
      * @returns {Number}
      */
     every: function () { return getConf().get("code.infoEvery") },
+    /**
+     * @returns {Number}
+     */
+    max: function () { return getConf().get("code.infoMax") },
   },
   warn: {
     /**
@@ -29,6 +33,10 @@ const code = {
      * @returns {Number}
      */
     every: function () { return getConf().get("code.warnEvery") },
+    /**
+     * @returns {Number}
+     */
+    max: function () { return getConf().get("code.warnMax") },
   },
   error: {
     /**
@@ -39,6 +47,10 @@ const code = {
      * @returns {Number}
      */
     every: function () { return getConf().get("code.errorEvery") },
+    /**
+     * @returns {Number}
+     */
+    max: function () { return getConf().get("code.errorMax") },
   },
   /**
    * @returns {String} 工作模式

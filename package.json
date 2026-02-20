@@ -77,6 +77,11 @@
             "default": 0,
             "description": "除了第一个信息以外的每个信息增加的强度"
           },
+          "codefixer-with-dg-lab.code.infoMax": {
+            "type": "number",
+            "default": 0,
+            "description": "除了第一个信息以外的最大信息计入数量"
+          },
           "codefixer-with-dg-lab.code.warnFirst": {
             "type": "number",
             "default": 5,
@@ -87,6 +92,11 @@
             "default": 3,
             "description": "除了第一个警告以外的每个警告增加的强度"
           },
+          "codefixer-with-dg-lab.code.warnMax": {
+            "type": "number",
+            "default": 3,
+            "description": "除了第一个警告以外的最大警告计入数量"
+          },
           "codefixer-with-dg-lab.code.errorFirst": {
             "type": "number",
             "default": 15,
@@ -96,6 +106,11 @@
             "type": "number",
             "default": 8,
             "description": "除了第一个错误以外的每个错误增加的强度"
+          },
+          "codefixer-with-dg-lab.code.errorMax": {
+            "type": "number",
+            "default": 3,
+            "description": "除了第一个错误以外的最大错误计入数量"
           }
         }
       },

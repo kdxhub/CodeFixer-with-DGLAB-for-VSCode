@@ -15,17 +15,17 @@ function EventDiagnosticProcessor(context) {
   vscode.languages.getDiagnostics(/* 只处理当前文件（可选：也可以处理 e.uris 里的所有文件） */editor.document.uri).forEach(diagnostic => {
     switch (diagnostic.severity) {
       case vscode.DiagnosticSeverity.Error:
-        errors++;
+        if ((errors - 1) < config.code.error.max()) { errors++; };
         break;
       case vscode.DiagnosticSeverity.Warning:
-        warnings++;
+        if ((warnings - 1) < config.code.warning.max()) { warnings++; };
         break;
       case vscode.DiagnosticSeverity.Information:
-        infos++;
+        if ((infos - 1) < config.code.info.max()) { infos++; };
         break;
       // Hint 也可以归入 Info 或单独统计
       case vscode.DiagnosticSeverity.Hint:
-        infos++;
+        if ((infos - 1) < config.code.info.max()) { infos++; };
         break;
     }
   });
