@@ -350,7 +350,7 @@ function startServerInternal() {
         // 更新状态
         if (boundClients.size <= 0) {
           if (!power.paused && startServerLock) { status = 3; }
-          vscode.window.showInformationMessage("当前没有已绑定的APP。");
+          vscode.window.showInformationMessage("所有客户端已断开连接。");
         } else {
           vscode.window.showInformationMessage(`有客户端断开连接，目前还有 ${boundClients.size} 台设备已绑定。`);
         }
