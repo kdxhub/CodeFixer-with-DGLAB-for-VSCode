@@ -378,6 +378,7 @@ function startServerInternal() {
             power.right.value[2] -= 1;
             if (power.right.value[2] <= 0) { power.right.value[2] = 0; };
           };
+          updateStatusBar();
         };
 
         // 其他消息忽略
