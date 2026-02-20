@@ -1,10 +1,23 @@
+# 忽略整个 node_modules 文件夹
+node_modules
+
+# 忽略源代码和构建配置
+src/**
+tsconfig.json
+jsconfig.json
+webpack.config.js
 .vscode/**
-.vscode-test/**
-test/**
+.utils/**
+
+# 忽略版本控制相关文件
 .gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/jsconfig.json
-**/*.map
-**/eslint.config.mjs
-**/.vscode-test.*
+.git/**
+.github/**
+
+# 忽略测试文件
+test/**
+out/test/**
+errors/**
+
+# 忽略开发时的日志和临时文件
+*.log

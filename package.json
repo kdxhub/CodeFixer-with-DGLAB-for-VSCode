@@ -14,7 +14,7 @@
       },
       {
         "command": "dglab.server.stop",
-        "title": "DGLAB: 关闭WebScoket"
+        "title": "DGLAB: 关闭WebSocket"
       },
       {
         "command": "dglab.server.pause",
@@ -26,7 +26,7 @@
       },
       {
         "command": "dglab.server.start",
-        "title": "DGLAB: 开启WebScoket"
+        "title": "DGLAB: 开启WebSocket"
       },
       {
         "command": "dglab.update",
@@ -156,7 +156,7 @@
         }
       },
       {
-        "title": "WebScoket服务器",
+        "title": "WebSocket服务器",
         "properties": {
           "codefixer-with-dg-lab.server.port": {
             "type": "number",
@@ -169,7 +169,12 @@
             "description": "服务器IP，不为空将覆盖自动检测结果。\n推荐仅在必要时才使用。"
           },
           "codefixer-with-dg-lab.server.qrcode.correctionLevel": {
-            "type": ["L", "M", "Q", "H"],
+            "type": [
+              "L",
+              "M",
+              "Q",
+              "H"
+            ],
             "default": "Q",
             "description": "二维码纠错级别，越大的纠错级别扫描成功率更高，也更慢。从低到高为 L M Q H。"
           },
@@ -185,13 +190,49 @@
         "properties": {
           "codefixer-with-dg-lab.pulse.left": {
             "type": "string",
-            "enum": ["呼吸","潮汐","连击","快速按捏","按捏渐强","心跳节奏","压缩","节奏步伐","颗粒摩擦","渐变弹跳","波浪涟漪","雨水冲刷","变速敲击","信号灯","挑逗1","挑逗2","随机"],
+            "enum": [
+              "呼吸",
+              "潮汐",
+              "连击",
+              "快速按捏",
+              "按捏渐强",
+              "心跳节奏",
+              "压缩",
+              "节奏步伐",
+              "颗粒摩擦",
+              "渐变弹跳",
+              "波浪涟漪",
+              "雨水冲刷",
+              "变速敲击",
+              "信号灯",
+              "挑逗1",
+              "挑逗2",
+              "随机"
+            ],
             "default": "随机",
             "description": "设置左通道波形。"
           },
           "codefixer-with-dg-lab.pulse.right": {
             "type": "string",
-            "enum": ["呼吸","潮汐","连击","快速按捏","按捏渐强","心跳节奏","压缩","节奏步伐","颗粒摩擦","渐变弹跳","波浪涟漪","雨水冲刷","变速敲击","信号灯","挑逗1","挑逗2","随机"],
+            "enum": [
+              "呼吸",
+              "潮汐",
+              "连击",
+              "快速按捏",
+              "按捏渐强",
+              "心跳节奏",
+              "压缩",
+              "节奏步伐",
+              "颗粒摩擦",
+              "渐变弹跳",
+              "波浪涟漪",
+              "雨水冲刷",
+              "变速敲击",
+              "信号灯",
+              "挑逗1",
+              "挑逗2",
+              "随机"
+            ],
             "default": "随机",
             "description": "设置右通道波形。"
           }
@@ -202,6 +243,9 @@
   "name": "codefixer-with-dg-lab",
   "displayName": "CodeFixer with DG-LAB",
   "description": "一种基于DGLAB与碳基低速神经网络的自动纠错插件",
+  "repository": {
+    "url": "https://github.com/kdxhub/CodeFixer-with-DGLAB-for-VSCode"
+  },
   "author": {
     "email": "kdxiaoyi@outlook.com",
     "name": "kdxiaoyi",
@@ -220,9 +264,8 @@
   ],
   "main": "./src/entry.js",
   "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "vscode-test"
+    "vscode:prepublish": "esbuild ./src/entry.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -230,9 +273,11 @@
     "@types/vscode": "^1.100.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.3",
     "eslint": "^9.39.2"
   },
   "dependencies": {
+    "@vscode/vsce": "^3.7.1",
     "qrcode": "^1.5.4",
     "uuid": "^8.3.2",
     "ws": "^8.19.0"

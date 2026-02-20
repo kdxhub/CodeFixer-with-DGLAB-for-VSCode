@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "command": "bash ./.utils/build.linux.sh",
+      "promptOnClose": true,
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "label": "构建VSIX文件",
+    }
+  ]
+}
