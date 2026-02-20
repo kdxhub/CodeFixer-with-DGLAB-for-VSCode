@@ -22,7 +22,7 @@ function activate(context) {
   vscode.languages.onDidChangeDiagnostics((e) => {
     events.EventDiagnosticProcessor(context);
   }, null, context.subscriptions);
-  vscode.window.onDidChangeActiveTextEditor(() => {
+  vscode.window.onDidChangeVisibleTextEditors(() => {
     events.EventDiagnosticProcessor(context);
   }, null, context.subscriptions);
 

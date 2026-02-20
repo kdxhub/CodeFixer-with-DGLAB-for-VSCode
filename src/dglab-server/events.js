@@ -6,7 +6,13 @@ const ui = require('../vsc-ui.js');
 function EventDiagnosticProcessor(context) {
   // 获取当前激活的编辑器
   const editor = vscode.window.activeTextEditor;
-  if (!editor) return;
+  if (!editor) {
+    console.log("上传纠错强度：", 0);
+    dglab.power().right.set(0, 0);
+    dglab.power().left.set(0, 0);
+    console.log("更新强度：", dglab.power().left.value, dglab.power().right.value);
+    return;
+  };
 
   // 分类统计
   let errors = 0;
