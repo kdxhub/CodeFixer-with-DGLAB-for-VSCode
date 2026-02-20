@@ -114,6 +114,7 @@ const power = {
   },
   pauseForced: function (reason) {
     if (power.paused || status == 0) { return; };
+    status = 1;
     power.paused = true;
     updateStatusBar();
     vscode.window.showInformationMessage("已自动暂停。" + reason);
@@ -183,8 +184,8 @@ function distributePunishment() {
     // 强度指令
     client.send(JSON.stringify({
       "type": "msg",
-      "clientId": serverId,        // 发送方为插件自身
-      "targetId": appId,           // 接收方为 APP 的 ID
+      "clientId": serverId,
+      "targetId": appId,
       "message": `strength-1+2+${power.left.get()}`,
     }));
     client.send(JSON.stringify({
@@ -298,8 +299,8 @@ function startServerInternal() {
             // 回复绑定成功
             ws.send(JSON.stringify({
               type: 'bind',
-              clientId: serverId,
-              targetId: data.clientId,
+              clientId: data.clientId,
+              targetId: serverId,
               message: '200'
             }));
             // 更新状态
@@ -436,4 +437,5 @@ module.exports = {
   getConnected,
   wsServer: () => { return wss; },
   regisiter,
+  serverId: serverId,
 };

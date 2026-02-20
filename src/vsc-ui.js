@@ -102,7 +102,7 @@ async function showConnect(ip = "0.0.0.0") {
   if (confIp) { address = confIp };
 
   // 转为二维码并保存到临时文件
-  const filePathPromise = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}`);
+  const filePathPromise = generateQRCodeWithText(`https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://${address}:${conf.server.port()}/${dglab.serverId}`);
   const filePath = (await filePathPromise).normalize();
   if (filePath == null) { return; };
 
