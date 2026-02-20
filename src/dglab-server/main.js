@@ -28,6 +28,11 @@ const heartbeatMsg = {
  * @type {NodeJS.Timeout}
  */
 let heartbeatInterval = null;
+/** 
+ * 波形定时器
+ * @type {NodeJS.Timeout}
+ */
+let pulseInterval = null;
 /**
  * 插件自身的固定 ID，用于模拟前端（控制端）
  */
@@ -171,7 +176,7 @@ function startServer() {
 };
 
 /** 
- * 立即下发强度配置和波形数据给所有已绑定的 APP
+ * 立即下发强度配置给所有已绑定的 APP
  * @apinote 更新强度后手动调用 vsc_ui.js 的 updateStatusBar()，其会自动调用本方法。
  * @apinote 每隔60秒心跳包下发时也会自动调用本方法。
  */
@@ -193,31 +198,6 @@ function distributePunishment() {
       "clientId": serverId,
       "targetId": appId,
       "message": `strength-2+2+${power.right.get()}`,
-    }));
-    // 波形（先清除再下发）
-    client.send(JSON.stringify({
-      "type": "msg",
-      "clientId": serverId,
-      "targetId": appId,
-      "message": "clear-A",
-    }));
-    client.send(JSON.stringify({
-      "type": "msg",
-      "clientId": serverId,
-      "targetId": appId,
-      "message": "clear-B",
-    }));
-    client.send(JSON.stringify({
-      "type": "msg",
-      "clientId": serverId,
-      "targetId": appId,
-      "message": "pulse-A:" + conf.pulse.left.getData(),
-    }));
-    client.send(JSON.stringify({
-      "type": "msg",
-      "clientId": serverId,
-      "targetId": appId,
-      "message": "pulse-B:" + conf.pulse.right.getData(),
     }));
   });
 };
@@ -254,6 +234,45 @@ function startServerInternal() {
           distributePunishment();
         };
       }, 60 * 1000);
+    };
+
+    // 启动波形下发定时器
+    if (!pulseInterval) {
+      pulseInterval = setInterval(() => {
+        // 向所有已连接的绑定的客户端发送消息
+        if (boundClients.size > 0) {
+          const pulse = [/* 缓存数据避免重复switch */conf.pulse.left.getData(), conf.pulse.right.getData()];
+          console.log("向 ", boundClients.size, ' 个客户端发送波形数据：' + new Date().toLocaleString());
+          boundClients.forEach((client, appId) => {
+            // 波形（先清除再下发）
+            client.send(JSON.stringify({
+              "type": "msg",
+              "clientId": serverId,
+              "targetId": appId,
+              "message": "clear-A",
+            }));
+            client.send(JSON.stringify({
+              "type": "msg",
+              "clientId": serverId,
+              "targetId": appId,
+              "message": "clear-B",
+            }));
+            if (power.paused/* 如果暂停则只清除不更新 */) { return; };
+            client.send(JSON.stringify({
+              "type": "msg",
+              "clientId": serverId,
+              "targetId": appId,
+              "message": "pulse-A:" + pulse[0],
+            }));
+            client.send(JSON.stringify({
+              "type": "msg",
+              "clientId": serverId,
+              "targetId": appId,
+              "message": "pulse-B:" + pulse[1],
+            }));
+          });
+        };
+      }, /* 波形下发每秒1次 */1000);
     };
 
     // 注册连接事件
