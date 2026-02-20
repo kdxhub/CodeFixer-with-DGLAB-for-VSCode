@@ -79,27 +79,33 @@ function getConnected() { return boundClients.size; };
 // 强度相关变量（保持不变）
 const power = {
   left: {
-    // 第一个表示代码纠错，第二个表示终端纠错
-    value: [0, 0],
+    // 第一个表示代码纠错，第二个表示终端纠错，第三个表示app设置
+    value: [0, 0, 0],
+    max: 100,
     set: function (index, value) { power.left.value[index] = value; },
     get: function () {
       if (power.paused) { return 0; };
-      let v = Math.floor(power.left.value[0] + power.left.value[1]);
+      let v = Math.floor(power.left.value[0] + power.left.value[1] + power.left.value[2]);
       if (v >= 200) {
         return 200;
+      } else if (v >= power.right.max) {
+        return power.right.max;
       } else if (v <= 0) {
         return 0;
       } else { return v; };
     },
   },
   right: {
-    value: [0, 0],
+    value: [0, 0, 0],
+    max: 100,
     set: function (index, value) { power.right.value[index] = value; },
     get: function () {
       if (power.paused) { return 0; };
-      let v = Math.floor(power.right.value[0] + power.right.value[1]);
+      let v = Math.floor(power.right.value[0] + power.right.value[1] + power.left.value[2]);
       if (v >= 200) {
         return 200;
+      } else if (v >= power.right.max) {
+        return power.right.max;
       } else if (v <= 0) {
         return 0;
       } else { return v; };
@@ -352,7 +358,33 @@ function startServerInternal() {
           power.pauseForced("APP按钮被点击。");
         }
 
-        // 其他消息可以按需处理，此处暂时忽略
+        // 处理 APP 反馈强度
+        if (data.type === "msg" && data.message.startsWith("strength-")) {
+          /**
+           * 4个成员，分别是 当前AB、最大AB
+           * @type {Number[]}
+           */
+          const strengths = Array.from(data.message.replaceAll("strength-").split("+"), Number);
+          if (strengths.length != 4) {
+            console.warn(`消息${id} 无效，反馈强度格式不正确。`);
+            return;
+          };
+          power.left.max = strengths[2];
+          power.right.max = strengths[3];
+          // 处理app操作基本强度
+          if (strengths[0] == (power.left.get() + 1)) { power.left.value[2] += 1; };
+          if (strengths[1] == (power.right.get() + 1)) { power.right.value[2] += 1; };
+          if (strengths[0] == (power.left.get() - 1)) {
+            power.left.value[2] -= 1;
+            if (power.left.value[2] <= 0) { power.left.value[2] = 0; };
+          };
+          if (strengths[1] == (power.right.get() - 1)) {
+            power.right.value[2] -= 1;
+            if (power.right.value[2] <= 0) { power.right.value[2] = 0; };
+          };
+        };
+
+        // 其他消息忽略
       });
 
       ws.on('close', () => {
