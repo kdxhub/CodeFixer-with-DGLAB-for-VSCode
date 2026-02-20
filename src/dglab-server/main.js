@@ -16,8 +16,6 @@ var wss;
 const allClients = new Map(); // key: clientId, value: WebSocket
 /** 储存已绑定的客户端（即已经完成 bind 的 APP） */
 const boundClients = new Map(); // key: clientId (APP), value: WebSocket
-/** 存储客户端和发送计时器关系（保留原功能，未使用） */
-const clientTimers = new Map();
 /** 心跳消息模板 */
 const heartbeatMsg = {
   type: "heartbeat",
@@ -33,7 +31,7 @@ let heartbeatInterval = null;
 /**
  * 插件自身的固定 ID，用于模拟前端（控制端）
  */
-const targetId = "c87d4640-17f3-4e23-862c-4f6ef7c550dd";
+const serverId = "c87d4640-17f3-4e23-862c-4f6ef7c550dd";
 /** 警告信息文本 */
 const warnmsg = `欢迎使用本插件。在继续操作前，请仔细阅读以下注意事项，充分了解相关风险：
 1. 功能说明：本插件通过联动 DG-LAB 设备，将 VSCode 中的特定状态转换为电击强度，从而对您施加电刺激。
@@ -185,26 +183,26 @@ function distributePunishment() {
     // 强度指令
     client.send(JSON.stringify({
       "type": "msg",
-      "clientId": targetId,        // 发送方为插件自身
+      "clientId": serverId,        // 发送方为插件自身
       "targetId": appId,           // 接收方为 APP 的 ID
       "message": `strength-1+2+${power.left.get()}`,
     }));
     client.send(JSON.stringify({
       "type": "msg",
-      "clientId": targetId,
+      "clientId": serverId,
       "targetId": appId,
       "message": `strength-2+2+${power.right.get()}`,
     }));
     // 波形
     client.send(JSON.stringify({
       "type": "msg",
-      "clientId": targetId,
+      "clientId": serverId,
       "targetId": appId,
       "message": "pulse-A:" + conf.pulse.left.getData(),
     }));
     client.send(JSON.stringify({
       "type": "msg",
-      "clientId": targetId,
+      "clientId": serverId,
       "targetId": appId,
       "message": "pulse-B:" + conf.pulse.right.getData(),
     }));
@@ -235,7 +233,7 @@ function startServerInternal() {
             let msg = {
               ...heartbeatMsg,
               clientId: clientId,
-              targetId: targetId
+              targetId: serverId
             };
             client.send(JSON.stringify(msg));
           });
@@ -284,12 +282,12 @@ function startServerInternal() {
           if (data.message === "DGLAB") {
             // APP 请求绑定到固定 targetId
             // 将当前连接标记为已绑定
-            boundClients.set(data.clientId, ws);
+            boundClients.set(data.targetId, ws);
             // 回复绑定成功
             ws.send(JSON.stringify({
               type: 'bind',
-              clientId: data.clientId,
-              targetId: targetId,
+              clientId: serverId,
+              targetId: data.clientId,
               message: '200'
             }));
             // 更新状态
@@ -297,7 +295,7 @@ function startServerInternal() {
               status = 2;
             }
             updateStatusBar();
-            console.log(`绑定成功：APP ${data.clientId} 已绑定到控制端 ${targetId}`);
+            console.log(`绑定成功：APP ${data.targetId} 已绑定到控制端`);
           } else {
             // 可能是初次连接后的 ID 确认，忽略
             // 但也可以回复错误
@@ -306,7 +304,7 @@ function startServerInternal() {
         };
 
         // 检查消息来源是否合法（必须与存储的连接匹配）
-        if (allClients.get(data.clientId) !== ws) {
+        if (allClients.get(data.targetId) !== ws) {
           console.warn(`消息${id} 无效，来源不正确。`);
           ws.send(JSON.stringify({
             type: 'msg',
@@ -328,17 +326,13 @@ function startServerInternal() {
       ws.on('close', () => {
         console.log('WebSocket 连接已关闭');
         // 从所有存储中移除
-        let closedClientId = null;
         for (let [id, client] of allClients.entries()) {
           if (client === ws) {
-            closedClientId = id;
             allClients.delete(id);
+            boundClients.delete(id);
+            console.log("已清除client " + id + "，当前剩余连接数: " + allClients.size + "，已绑定数: " + boundClients.size);
             break;
           }
-        }
-        if (closedClientId) {
-          boundClients.delete(closedClientId);
-          console.log("已清除client " + closedClientId + "，当前剩余连接数: " + allClients.size + "，已绑定数: " + boundClients.size);
         }
 
         // 更新状态
@@ -395,7 +389,7 @@ function stopServer() {
 
   // 断开全部连接
   allClients.forEach((client, clientId) => {
-    const data = { type: "break", clientId: clientId, targetId: targetId, message: "209" };
+    const data = { type: "break", clientId: clientId, targetId: serverId, message: "209" };
     client.send(JSON.stringify(data));
     client.close();
     console.log("断开与客户端" + clientId + "的连接：", client);
