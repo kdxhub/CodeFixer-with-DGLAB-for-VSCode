@@ -337,7 +337,7 @@ function startServerInternal() {
 
         // 更新状态
         if (boundClients.size <= 0) {
-          if (!power.paused) { status = 3; }
+          if (!power.paused && startServerLock) { status = 3; }
           vscode.window.showInformationMessage("当前没有已绑定的APP。");
         } else {
           vscode.window.showInformationMessage(`有客户端断开连接，目前还有 ${boundClients.size} 台设备已绑定。`);
@@ -386,16 +386,19 @@ function stopServer() {
   // 停止心跳
   clearInterval(heartbeatInterval);
   heartbeatInterval = null;
+  // 设置状态
+  power.paused = false;
+  startServerLock = false;
 
   // 断开全部连接
+  boundClients./* 边清空边删掉记录防止上面的代码错误重置 status 状态 */clear();
   allClients.forEach((client, clientId) => {
+    allClients.delete(clientId);
     const data = { type: "break", clientId: clientId, targetId: serverId, message: "209" };
     client.send(JSON.stringify(data));
     client.close();
     console.log("断开与客户端" + clientId + "的连接：", client);
   });
-  allClients.clear();
-  boundClients.clear();
 
   // 关闭服务器
   if (wss) {
@@ -408,8 +411,6 @@ function stopServer() {
 
   // 更新状态
   status = 0;
-  power.paused = false;
-  startServerLock = false;
   updateStatusBar();
 }
 
