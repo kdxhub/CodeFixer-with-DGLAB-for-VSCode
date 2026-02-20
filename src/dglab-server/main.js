@@ -278,18 +278,6 @@ function startServerInternal() {
           return;
         };
 
-        // 检查消息来源是否合法（必须与存储的连接匹配）
-        if (allClients.get(data.clientId) !== ws) {
-          console.warn(`消息${id} 无效，来源不正确。`);
-          ws.send(JSON.stringify({
-            type: 'msg',
-            clientId: "",
-            targetId: "",
-            message: '404'
-          }));
-          return;
-        };
-
         // 处理绑定请求（APP 请求与控制端绑定）
         if (data.type === "bind") {
           console.log("正在处理绑定请求");
@@ -314,6 +302,18 @@ function startServerInternal() {
             // 可能是初次连接后的 ID 确认，忽略
             // 但也可以回复错误
           }
+          return;
+        };
+
+        // 检查消息来源是否合法（必须与存储的连接匹配）
+        if (allClients.get(data.clientId) !== ws) {
+          console.warn(`消息${id} 无效，来源不正确。`);
+          ws.send(JSON.stringify({
+            type: 'msg',
+            clientId: "",
+            targetId: "",
+            message: '404'
+          }));
           return;
         };
 
