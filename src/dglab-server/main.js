@@ -86,8 +86,8 @@ const power = {
     get: function () {
       if (power.paused) { return 0; };
       let v = Math.floor(power.left.value[0] + power.left.value[1] + power.left.value[2]);
-       if (v >= power.right.max) {
-        return power.right.max;
+       if (v >= power.left.max) {
+        return power.left.max;
       } else if (v <= 0) {
         return 0;
       } else { return v; };
