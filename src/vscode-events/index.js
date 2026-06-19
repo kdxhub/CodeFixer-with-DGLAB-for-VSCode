@@ -206,6 +206,197 @@ class VscodeEventHandler {
     }
   }
 
+  // ── Award 事件处理 ──
+
+  /**
+   * 处理 award 事件：创建/更新强度事件
+   * @param {object} cfg       - { act: number, duration: number }
+   * @param {string} eventId   - 事件唯一 ID
+   * @param {string} label     - 事件标签
+   */
+  _processAward(cfg, eventId, label) {
+    const { act, duration } = cfg;
+    if (!act || act === 0) return;
+
+    const mode = this._config.awardMode;
+    const leftVal = this._calcChannelValue(mode, act);
+    const rightVal = this._calcChannelValueReverse(mode, act);
+
+    const addSide = (channel, val) => {
+      if (val <= 0) return;
+      const id = `${eventId}_${channel}`;
+
+      if (duration > 0) {
+        // 临时事件（含时间戳防冲突）
+        const ts = Date.now();
+        const uid = `${id}_${ts}_${Math.random().toString(36).slice(2, 6)}`;
+        this._pm.addEvent({
+          id: uid,
+          channel,
+          value: val,
+          category: 'temporary',
+          label,
+          duration,
+        });
+      } else {
+        // 持久事件 — 叠加到已有事件上
+        const existing = this._pm.getEvent(id);
+        if (existing) {
+          existing.value += val;
+        } else {
+          this._pm.addEvent({
+            id,
+            channel,
+            value: val,
+            category: 'persistent',
+            label,
+          });
+        }
+      }
+    };
+
+    addSide('left', leftVal);
+    addSide('right', rightVal);
+
+    console.log(`Award 事件 "${label}" (${eventId}): act=${act}, duration=${duration}`);
+    this._notifyUpdate();
+  }
+
+  /**
+   * 处理断点变更事件
+   */
+  processBreakpoints(e) {
+    const cfgNew = this._config.award.debugging.breakpoint.new;
+    const cfgRemove = this._config.award.debugging.breakpoint.remove;
+
+    if (e.added.length > 0) {
+      this._processAward(cfgNew, '_award_breakpoint', '新增断点');
+    }
+    if (e.removed.length > 0) {
+      this._processAward(cfgRemove, '_award_breakpoint', '移除断点');
+    }
+  }
+
+  /**
+   * 处理调试会话开始
+   */
+  processDebugStart() {
+    this._processAward(
+      this._config.award.debugging.start,
+      '_award_debug_start',
+      '调试开始'
+    );
+  }
+
+  /**
+   * 处理调试会话结束
+   */
+  processDebugStop() {
+    this._processAward(
+      this._config.award.debugging.stop,
+      '_award_debug_stop',
+      '调试结束'
+    );
+  }
+
+  /**
+   * 处理键入字符
+   */
+  processTyping(event) {
+    // 只处理用户主动的文本变更（非撤销、保存等）
+    if (event.reason !== vscode.TextDocumentChangeReason.Redo &&
+        event.reason !== vscode.TextDocumentChangeReason.Undo) {
+      // 检查是否有实际内容变更
+      for (const change of event.contentChanges) {
+        if (change.text.length > 0) {
+          this._processAward(
+            this._config.award.typing,
+            '_award_typing',
+            '键入字符'
+          );
+          return;
+        }
+      }
+    }
+  }
+
+  /**
+   * 处理新建文件
+   */
+  processCreate(event) {
+    if (event.files.length > 0) {
+      this._processAward(
+        this._config.award.create,
+        '_award_create',
+        '新建文件'
+      );
+    }
+  }
+
+  /**
+   * 处理打开文件
+   */
+  processOpen(document) {
+    // 忽略未保存的临时文件、设置文件等
+    if (document.uri.scheme !== 'file') return;
+    // 忽略第一次打开时已经打开的默认文件，通过检查是否是被动打开判断
+    this._processAward(
+      this._config.award.open,
+      '_award_open',
+      '打开文件'
+    );
+  }
+
+  /**
+   * 处理保存文件
+   */
+  processSave(document) {
+    if (document.uri.scheme !== 'file') return;
+    this._processAward(
+      this._config.award.save,
+      '_award_save',
+      '保存文件'
+    );
+  }
+
+  /**
+   * 处理 Git 提交（通过内置 Git 扩展 API）
+   */
+  async _watchGitCommit() {
+    try {
+      const gitExt = vscode.extensions.getExtension('vscode.git');
+      if (!gitExt) {
+        console.log('Git 扩展未安装，scm.commit 功能不可用');
+        return;
+      }
+      const gitApi = gitExt.exports.getAPI(1);
+      if (!gitApi || !gitApi.repositories) return;
+
+      const onCommit = (repo) => {
+        if (repo.onDidRunGitCommit) {
+          repo.onDidRunGitCommit(() => {
+            this._processAward(
+              this._config.award.scm.commit,
+              '_award_scm_commit',
+              'Git 提交'
+            );
+          });
+        }
+      };
+
+      for (const repo of gitApi.repositories) {
+        onCommit(repo);
+      }
+
+      // 监听新仓库注册
+      gitApi.onDidOpenRepository && gitApi.onDidOpenRepository((repo) => {
+        onCommit(repo);
+      });
+    } catch (err) {
+      console.warn('Git 扩展 API 获取失败，scm.commit 不可用:', err.message);
+    }
+  }
+
   async _ensureShellIntegration() {
     const config = vscode.workspace.getConfiguration('terminal.integrated');
     const enabled = config.get('shellIntegration.enabled');
@@ -230,6 +421,7 @@ class VscodeEventHandler {
    * @param {vscode.ExtensionContext} context
    */
   registerListeners(context) {
+    // ── 诊断事件 ──
     context.subscriptions.push(
       vscode.languages.onDidChangeDiagnostics(() => this.processDiagnostics())
     );
@@ -237,10 +429,47 @@ class VscodeEventHandler {
       vscode.window.onDidChangeVisibleTextEditors(() => this.processDiagnostics())
     );
 
+    // ── 终端事件 ──
     this._ensureShellIntegration();
     context.subscriptions.push(
       vscode.window.onDidEndTerminalShellExecution((e) => this.processTerminalExecution(e))
     );
+
+    // ── Award: 调试断点 ──
+    context.subscriptions.push(
+      vscode.debug.onDidChangeBreakpoints((e) => this.processBreakpoints(e))
+    );
+
+    // ── Award: 调试开始/结束 ──
+    context.subscriptions.push(
+      vscode.debug.onDidStartDebugSession(() => this.processDebugStart())
+    );
+    context.subscriptions.push(
+      vscode.debug.onDidTerminateDebugSession(() => this.processDebugStop())
+    );
+
+    // ── Award: 键入字符 ──
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeTextDocument((e) => this.processTyping(e))
+    );
+
+    // ── Award: 新建文件 ──
+    context.subscriptions.push(
+      vscode.workspace.onDidCreateFiles((e) => this.processCreate(e))
+    );
+
+    // ── Award: 打开文件 ──
+    context.subscriptions.push(
+      vscode.workspace.onDidOpenTextDocument((doc) => this.processOpen(doc))
+    );
+
+    // ── Award: 保存文件 ──
+    context.subscriptions.push(
+      vscode.workspace.onDidSaveTextDocument((doc) => this.processSave(doc))
+    );
+
+    // ── Award: Git 提交 ──
+    this._watchGitCommit();
   }
 }
 

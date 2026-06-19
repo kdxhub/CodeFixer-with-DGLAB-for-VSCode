@@ -93,6 +93,67 @@ class ConfigManager {
     return this._cache.get('server.qrcode.correctionLevel');
   }
 
+  // ── 行为反馈回路（Award）配置 ──
+
+  /** 行为反馈强度分配模式 */
+  get awardMode() {
+    return this._cache.get('award.side');
+  }
+
+  /**
+   * 获取所有 award 配置的快捷方式
+   */
+  get award() {
+    return {
+      debugging: {
+        breakpoint: {
+          new: {
+            act: this._cache.get('award.debugging.breakpoint.new'),
+            duration: this._cache.get('award.debugging.breakpoint.new.duration'),
+          },
+          remove: {
+            act: this._cache.get('award.debugging.breakpoint.remove'),
+            duration: this._cache.get('award.debugging.breakpoint.remove.duration'),
+          },
+        },
+        start: {
+          act: this._cache.get('award.debugging.start.act'),
+          duration: this._cache.get('award.debugging.start.duration'),
+        },
+        stop: {
+          act: this._cache.get('award.debugging.stop.act'),
+          duration: this._cache.get('award.debugging.stop.duration'),
+        },
+      },
+      typing: {
+        act: this._cache.get('award.typing.act'),
+        duration: this._cache.get('award.typing.duration'),
+      },
+      create: {
+        act: this._cache.get('award.create.act'),
+        duration: this._cache.get('award.create.duration'),
+      },
+      open: {
+        act: this._cache.get('award.open.act'),
+        duration: this._cache.get('award.open.duration'),
+      },
+      save: {
+        act: this._cache.get('award.save.act'),
+        duration: this._cache.get('award.save.duration'),
+      },
+      scm: {
+        commit: {
+          act: this._cache.get('award.scm.commit.act'),
+          duration: this._cache.get('award.scm.commit.duration'),
+        },
+      },
+    };
+  }
+
+  /** 简写：获取指定 award 的 act/duration */
+  awardAct(cfg) { return cfg.act; }
+  awardDuration(cfg) { return cfg.duration; }
+
   // ── 波形配置 ──
   get pulseLeft() {
     return this._cache.get('pulse.left');
