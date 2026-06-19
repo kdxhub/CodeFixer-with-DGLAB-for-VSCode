@@ -246,7 +246,7 @@
           },
           "codefixer-with-dg-lab.award.typing.duration": {
             "type": "integer",
-            "default": 500,
+            "default": 700,
             "description": "「键入字符」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.scm.commit.act": {

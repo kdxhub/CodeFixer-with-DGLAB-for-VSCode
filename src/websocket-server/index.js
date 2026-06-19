@@ -243,7 +243,7 @@ class WebSocketServer {
     if (this._pm.paused || !this._wss) return;
     this._pm.pause();
     this._notifyStatus(ServerStatus.PAUSED);
-    this._notifyInfo(`已自动暂停。${reason}`);
+    this._notifyInfo(`已自动暂停:${reason}`);
   }
 
   /**
@@ -269,8 +269,12 @@ class WebSocketServer {
             type: 'heartbeat', clientId, targetId: sid, message: '200',
           }));
         });
-        this.distributePunishment();
-      }, this._config.interval);
+      }, 60 * 1000);
+    }
+    
+    if (!this._punishmentInterval) {
+      this._punishmentIntervalConf = this._config.interval;
+      this._punishmentInterval = setInterval(() => this._handlePunishmentInterval(), this._config.interval);
     }
 
     if (!this._pulseInterval) {
@@ -297,6 +301,16 @@ class WebSocketServer {
           }));
         });
       }, 1000);
+    }
+  }
+
+  _handlePunishmentInterval() {
+    this.distributePunishment();
+    // 如果配置的间隔变了，重建定时器
+    if (this._punishmentIntervalConf !== this._config.interval) {
+      clearInterval(this._punishmentInterval);
+      this._punishmentIntervalConf = this._config.interval;
+      this._punishmentInterval = setInterval(() => this._handlePunishmentInterval(), this._config.interval);
     }
   }
 

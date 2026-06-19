@@ -79,6 +79,8 @@ class StatusBarManager {
    */
   _bindServerCallbacks() {
     const ws = this._wsServer;
+    const conf = this._config;
+    const updateFunc = this.update;
 
     ws.onStatusChange(() => this.update());
 

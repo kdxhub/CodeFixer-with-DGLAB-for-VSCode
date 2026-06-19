@@ -178,6 +178,7 @@ class VscodeEventHandler {
         category: 'temporary',
         label: '终端退出码',
         duration,
+        onExpire: () => this._notifyUpdate(),
       });
     }
 
@@ -189,6 +190,7 @@ class VscodeEventHandler {
         category: 'temporary',
         label: '终端退出码',
         duration,
+        onExpire: () => this._notifyUpdate(),
       });
     }
 
@@ -237,6 +239,7 @@ class VscodeEventHandler {
           category: 'temporary',
           label,
           duration,
+          onExpire: () => this._notifyUpdate(),
         });
       } else {
         // 持久事件 — 叠加到已有事件上
