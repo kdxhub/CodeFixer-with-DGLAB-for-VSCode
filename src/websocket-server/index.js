@@ -2,6 +2,24 @@ const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
 
 /**
+ * 服务状态枚举
+ * @readonly
+ * @enum {number}
+ */
+const ServerStatus = {
+  /** 服务器关闭 */
+  STOPPED: 0,
+  /** 暂停 */
+  PAUSED: 1,
+  /** 工作中（有已绑定的 APP） */
+  WORKING: 2,
+  /** 无 APP 连接 */
+  IDLE: 3,
+  /** 异常 */
+  ERROR: -1,
+};
+
+/**
  * WebSocket 服务器
  * 负责 WebSocket 生命周期、心跳、脉冲下发、消息路由。
  * 依赖注入：ConnectionManager, PowerManager, PulseManager, ConfigManager
@@ -409,10 +427,10 @@ class WebSocketServer {
   // ── 状态计算 ──
 
   _getCurrentStatus() {
-    if (this._pm.paused) return 1;
-    if (this._cm.hasBound) return 2;
-    if (this._cm.hasAny) return 3;
-    return 0;
+    if (this._pm.paused) return ServerStatus.PAUSED;
+    if (this._cm.hasBound) return ServerStatus.WORKING;
+    if (!this._cm.hasAny) return ServerStatus.IDLE;
+    return ServerStatus.STOPPED;
   }
 
   _getWarnMsg() {
