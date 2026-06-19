@@ -149,7 +149,7 @@ class WebSocketServer {
       this._wss = new WebSocket.Server({ port });
 
       this._wss.on('listening', () => {
-        this._notifyStatus(3); // IDLE
+        this._notifyStatus(ServerStatus.IDLE);
         this._notifyInfo(`WebSocket服务器已启动，端口: ${port}`);
         console.log(`成功启动WebSocket服务器 @ ws://localhost:${port}`);
         this._startTimers();
@@ -162,12 +162,12 @@ class WebSocketServer {
           this._notifyError(`端口 ${port} 已被占用，请更换端口。`);
         }
         console.error('WebSocket 服务器错误:', error);
-        this._notifyStatus(-1);
+        this._notifyStatus(ServerStatus.ERROR);
       });
     } catch (error) {
       console.error('无法启动DGLAB WebSocket服务器：', error);
       this._notifyError(`无法启动WebSocket服务器：${error.message}`);
-      this._notifyStatus(-1);
+      this._notifyStatus(ServerStatus.ERROR);
     }
   }
 
@@ -204,7 +204,7 @@ class WebSocketServer {
     }
 
     this._notifyInfo('WebSocket服务器已关闭');
-    this._notifyStatus(0);
+    this._notifyStatus(ServerStatus.STOPPED);
   }
 
   /**
@@ -213,20 +213,20 @@ class WebSocketServer {
   switchMode() {
     const s = this.getStatus();
     switch (s) {
-      case 0:
+      case ServerStatus.STOPPED:
         this.startServer();
         break;
-      case 1:
+      case ServerStatus.PAUSED:
         this._pm.resume();
         this._notifyStatus(this._getCurrentStatus());
         this._notifyInfo('服务恢复');
         break;
-      case 2:
+      case ServerStatus.WORKING:
         this._pm.pause();
-        this._notifyStatus(1);
+        this._notifyStatus(ServerStatus.PAUSED);
         this._notifyInfo('已暂停服务');
         break;
-      case 3:
+      case ServerStatus.IDLE:
         this._notifyShowConnect();
         break;
       default:
@@ -242,7 +242,7 @@ class WebSocketServer {
   forcePause(reason) {
     if (this._pm.paused || !this._wss) return;
     this._pm.pause();
-    this._notifyStatus(1);
+    this._notifyStatus(ServerStatus.PAUSED);
     this._notifyInfo(`已自动暂停。${reason}`);
   }
 
@@ -251,7 +251,7 @@ class WebSocketServer {
    * @returns {number}
    */
   getStatus() {
-    if (!this._wss) return 0;
+    if (!this._wss) return ServerStatus.STOPPED;
     return this._getCurrentStatus();
   }
 
@@ -339,7 +339,7 @@ class WebSocketServer {
           targetId: this._cm.serverId,
           message: '200',
         }));
-        if (!this._pm.paused) this._notifyStatus(2);
+        if (!this._pm.paused) this._notifyStatus(ServerStatus.WORKING);
         console.log(`绑定成功：APP ${data.targetId} 已绑定到控制端`);
       }
       return;
@@ -409,7 +409,7 @@ class WebSocketServer {
     this._cm.removeByWs(ws);
 
     if (hadBound && !this._cm.hasBound) {
-      if (!this._pm.paused) this._notifyStatus(3);
+      if (!this._pm.paused) this._notifyStatus(ServerStatus.IDLE);
       this._notifyInfo('所有客户端已断开连接。');
     } else {
       this._notifyInfo(`有客户端断开连接，目前还有 ${this._cm.boundCount} 台设备已绑定。`);

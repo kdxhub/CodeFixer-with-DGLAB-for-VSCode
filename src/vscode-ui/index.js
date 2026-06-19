@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const os = require('os');
 const path = require('path');
+const { ServerStatus } = require('../pulse-service');
 
 /**
  * VSCode UI 管理器
@@ -104,27 +105,27 @@ class StatusBarManager {
    */
   update() {
     const status = this._wsServer.getStatus();
-    const connected = this._wsServer.getStatus() >= 2
+    const connected = this._wsServer.getStatus() >= ServerStatus.WORKING
       ? this._getBoundCount()
       : 0;
 
     switch (status) {
-      case 0:
+      case ServerStatus.STOPPED:
         this._statusBar.text = '$(error)DGLAB：禁用';
         this._statusBar.tooltip = '当前服务器未启用。\n点按以开启。';
         this._statusBar.backgroundColor = undefined;
         break;
-      case 1:
+      case ServerStatus.PAUSED:
         this._statusBar.text = '$(stop-circle)DGLAB：暂停';
         this._statusBar.tooltip = `当前服务已暂停，已连接${connected}台客户端。\n点按以恢复。`;
         this._statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         break;
-      case 2:
+      case ServerStatus.WORKING:
         this._statusBar.text = `$(heart)DGLAB：${this._pm.getLeft()} | ${this._pm.getRight()}`;
         this._statusBar.tooltip = `当前服务正在运行，已连接${connected}台客户端。\n两侧数字代表对应方向的强度。\n点按以暂停。`;
         this._statusBar.backgroundColor = undefined;
         break;
-      case 3:
+      case ServerStatus.IDLE:
         this._statusBar.text = '$(debug-disconnect)DGLAB：等待连接';
         this._statusBar.tooltip = '当前服务正在运行，但没有客户端连接。\n点按以连接。';
         this._statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
