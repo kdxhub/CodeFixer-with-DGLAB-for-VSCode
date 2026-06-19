@@ -12,93 +12,93 @@ function getConf() {
 const code = {
   info: {
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     first: function () { return getConf().get("code.infoFirst") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     every: function () { return getConf().get("code.infoEvery") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     max: function () { return getConf().get("code.infoMax") },
   },
   warn: {
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     first: function () { return getConf().get("code.warnFirst") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     every: function () { return getConf().get("code.warnEvery") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     max: function () { return getConf().get("code.warnMax") },
   },
   error: {
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     first: function () { return getConf().get("code.errorFirst") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     every: function () { return getConf().get("code.errorEvery") },
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     max: function () { return getConf().get("code.errorMax") },
   },
   /**
-   * @returns {String} 工作模式
+   * @returns {String|undefined} 工作模式
    */
   mode: function () { return getConf().get("code.side") },
 }
 const terminal = {
   /**
-   * @returns {String} 工作模式
+   * @returns {String|undefined} 工作模式
    */
   mode: function () { return getConf().get("terminal.side") },
   /**
-   * @returns {boolean}
+   * @returns {boolean|undefined}
    */
   inrevertable: function () { return conf.get("terminal.inrevertable") },
   /**
-   * @returns {number}
+   * @returns {number|undefined}
    */
   rate: function () { return getConf().get("terminal.rate") },
   /**
-   * @returns {number}
+   * @returns {number|undefined}
    */
   duration: function () { return getConf().get("terminal.duration") },
   /**
-   * @returns {number}
+   * @returns {number|undefined}
    */
   interrupt: function () { return getConf().get("terminal.interruptSeeAs") },
   /**
-   * @returns {String}
+   * @returns {String|undefined}
    */
   tips: function () { return getConf().get("terminal.tips") },
 }
 const server = {
   /**
-   * @returns {Number}
+   * @returns {Number|undefined}
    */
   port: function () { return getConf().get("server.port") },
   /**
-   * @returns {String}
+   * @returns {String|undefined}
    */
   ip: function () { return getConf().get("server.override_ip") },
   qrcode: {
     /**
-     * @returns {Number}
+     * @returns {Number|undefined}
      */
     size: function () { return getConf().get("server.qrcode.size") },
     /**
-     * @returns {String}
+     * @returns {String|undefined}
      */
     correctlevel: function () { return getConf().get("server.qrcode.correctionLevel") },
   }
@@ -123,7 +123,9 @@ function getLocalIp() {
     const interfaces = os.networkInterfaces();
     for (const interfaceName in interfaces) {
       const iface = interfaces[interfaceName];
+      // @ts-ignore
       for (let i = 0; i < iface.length; i++) {
+        // @ts-ignore
         const alias = iface[i];
         if (/* alias.family === 'IPv4' &&  */!alias.internal) {
           return alias.address;

@@ -53,7 +53,7 @@ const warnmsg = `欢迎使用本插件。在继续操作前，请仔细阅读以
 
 /* 注册回调函数并保证基本能用 */
 let updateStatusBar = function () { return; };
-let showConnect = function (param1) { return; };
+let showConnect = function () { return; };
 function regisiter(updateStatusBarFunc, showConnectFunc) {
   updateStatusBar = updateStatusBarFunc;
   showConnect = showConnectFunc;

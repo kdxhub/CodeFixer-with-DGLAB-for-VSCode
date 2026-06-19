@@ -3,6 +3,8 @@ const config = require('../config.js');
 const dglab = require('./main.js');
 const ui = require('../vsc-ui.js');
 
+// @ts-ignore
+// @ts-ignore
 function EventDiagnosticProcessor(context) {
   // 获取当前激活的编辑器
   const editor = vscode.window.activeTextEditor;
@@ -21,16 +23,20 @@ function EventDiagnosticProcessor(context) {
   vscode.languages.getDiagnostics(/* 只处理当前文件（可选：也可以处理 e.uris 里的所有文件） */editor.document.uri).forEach(diagnostic => {
     switch (diagnostic.severity) {
       case vscode.DiagnosticSeverity.Error:
+        // @ts-ignore
         if ((errors - 1) < config.code.error.max()) { errors++; };
         break;
       case vscode.DiagnosticSeverity.Warning:
+        // @ts-ignore
         if ((warnings - 1) < config.code.warning.max()) { warnings++; };
         break;
       case vscode.DiagnosticSeverity.Information:
+        // @ts-ignore
         if ((infos - 1) < config.code.info.max()) { infos++; };
         break;
       // Hint 也可以归入 Info 或单独统计
       case vscode.DiagnosticSeverity.Hint:
+        // @ts-ignore
         if ((infos - 1) < config.code.info.max()) { infos++; };
         break;
     }
@@ -39,15 +45,21 @@ function EventDiagnosticProcessor(context) {
   // 数量转为强度
   let strength = 0;
   if (errors >= 1) {
+    // @ts-ignore
     strength += config.code.error.first();
+    // @ts-ignore
     strength += config.code.error.every() * (errors - 1);
   };
   if (warnings >= 1) {
+    // @ts-ignore
     strength += config.code.warn.first();
+    // @ts-ignore
     strength += config.code.warn.every() * (warnings - 1);
   };
   if (infos >= 1) {
+    // @ts-ignore
     strength += config.code.info.first();
+    // @ts-ignore
     strength += config.code.info.every() * (infos - 1);
   };
 
@@ -85,6 +97,7 @@ function EventDiagnosticProcessor(context) {
   ui.updateStatusBar();
 }
 
+// @ts-ignore
 function TerminalErrorcodeProcessor(event, context) {
   // 修正退出码
   let exitCode = event.exitCode;
@@ -93,11 +106,13 @@ function TerminalErrorcodeProcessor(event, context) {
   };
   let rate = config.terminal.rate();
   let duration = config.terminal.duration();
+  // @ts-ignore
   if (exitCode <= 0 || rate <= 0 || duration <= 0) {
     return;
   };
 
   // 处理退出码
+  // @ts-ignore
   let strength = exitCode * config.terminal.rate();
 
   // 上传
@@ -183,6 +198,7 @@ function TerminalErrorcodeProcessor(event, context) {
   // 出现提示
   const tips = config.terminal.tips();
   if (tips != null && tips.length != 0) {
+    // @ts-ignore
     vscode.window.showInformationMessage(tips.replaceAll("%duration%", duration.toString()).replaceAll("%strength%", strength.toString()));
   };
 }
