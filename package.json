@@ -68,47 +68,47 @@
             "description": "电流往哪个电极输出。"
           },
           "codefixer-with-dg-lab.code.infoFirst": {
-            "type": "number",
+            "type": "integer",
             "default": 0,
             "description": "第一个信息增加的强度\n（提示：下文全部强度都可以输入负数，此时表示触发时抵消强度）"
           },
           "codefixer-with-dg-lab.code.infoEvery": {
-            "type": "number",
+            "type": "integer",
             "default": 0,
             "description": "除了第一个信息以外的每个信息增加的强度"
           },
           "codefixer-with-dg-lab.code.infoMax": {
-            "type": "number",
+            "type": "integer",
             "default": 0,
             "description": "除了第一个信息以外的最大信息计入数量"
           },
           "codefixer-with-dg-lab.code.warnFirst": {
-            "type": "number",
+            "type": "integer",
             "default": 5,
             "description": "第一个警告增加的强度"
           },
           "codefixer-with-dg-lab.code.warnEvery": {
-            "type": "number",
+            "type": "integer",
             "default": 3,
             "description": "除了第一个警告以外的每个警告增加的强度"
           },
           "codefixer-with-dg-lab.code.warnMax": {
-            "type": "number",
+            "type": "integer",
             "default": 3,
             "description": "除了第一个警告以外的最大警告计入数量"
           },
           "codefixer-with-dg-lab.code.errorFirst": {
-            "type": "number",
+            "type": "integer",
             "default": 15,
             "description": "第一个错误增加的强度"
           },
           "codefixer-with-dg-lab.code.errorEvery": {
-            "type": "number",
+            "type": "integer",
             "default": 8,
             "description": "除了第一个错误以外的每个错误增加的强度"
           },
           "codefixer-with-dg-lab.code.errorMax": {
-            "type": "number",
+            "type": "integer",
             "default": 3,
             "description": "除了第一个错误以外的最大错误计入数量"
           }
@@ -154,12 +154,12 @@
             "description": "当终端产生错误时，将错误代码转换为强度的倍率。\n将 %ERRORLEVEL% 或者 $? 乘以此系数得到的值作为强度。\n如果设为 0 则禁用本功能。"
           },
           "codefixer-with-dg-lab.terminal.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 3000,
             "description": "当终端产生错误时，强度将叠加多长时间。单位毫秒\n如果设为 0 则禁用本功能。"
           },
           "codefixer-with-dg-lab.terminal.interruptSeeAs": {
-            "type": "number",
+            "type": "integer",
             "default": 0,
             "description": "终端命令被 Ctrl+C 等终端导致没有返回码时视作返回了多少。\n本配置是受 rate 影响之前的值。"
           },
@@ -200,92 +200,92 @@
             "description": "行为反馈电流往哪个电极输出。"
           },
           "codefixer-with-dg-lab.award.debugging.breakpoint.new": {
-            "type": "number",
+            "type": "integer",
             "default": 15,
             "description": "当「调试：新增断点」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.debugging.breakpoint.remove": {
-            "type": "number",
+            "type": "integer",
             "default": 15,
             "description": "当「调试：移除断点」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.debugging.breakpoint.new.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 2000,
             "description": "「调试：新增断点」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.debugging.breakpoint.remove.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 1500,
             "description": "「调试：移除断点」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.debugging.stop.act": {
-            "type": "number",
+            "type": "integer",
             "default": 10,
             "description": "当「调试：结束」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.debugging.stop.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 3000,
             "description": "「调试：结束」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.debugging.start.act": {
-            "type": "number",
+            "type": "integer",
             "default": 10,
             "description": "当「调试：开始」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.debugging.start.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 3000,
             "description": "「调试：开始」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.typing.act": {
-            "type": "number",
+            "type": "integer",
             "default": 1,
             "description": "当「键入字符」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.typing.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 500,
             "description": "「键入字符」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.scm.commit.act": {
-            "type": "number",
-            "default": "-20",
+            "type": "integer",
+            "default": -20,
             "description": "当「源代码管理：提交」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.scm.commit.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 5000,
             "description": "「源代码管理：提交」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.create.act": {
-            "type": "number",
+            "type": "integer",
             "default": 5,
             "description": "当「新建文件」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.create.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 2000,
             "description": "「新建文件」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.open.act": {
-            "type": "number",
+            "type": "integer",
             "default": 10,
             "description": "当「打开」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.open.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 2000,
             "description": "「打开」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           },
           "codefixer-with-dg-lab.award.save.act": {
-            "type": "number",
+            "type": "integer",
             "default": 12,
             "description": "当「保存」时要增加的强度。"
           },
           "codefixer-with-dg-lab.award.save.duration": {
-            "type": "number",
+            "type": "integer",
             "default": 3000,
             "description": "「保存」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           }
@@ -295,7 +295,7 @@
         "title": "WebSocket服务器",
         "properties": {
           "codefixer-with-dg-lab.server.port": {
-            "type": "number",
+            "type": "integer",
             "default": 59999,
             "description": "服务器端口"
           },
