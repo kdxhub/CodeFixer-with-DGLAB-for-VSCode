@@ -88,12 +88,14 @@ class IntensityEvent {
  * ```
  */
 class PowerManager {
-  constructor() {
+  constructor(configManager) {
     /** @type {Map<string, IntensityEvent>} */
     this._events = new Map();
     /** 硬上限，任何情况下最终强度不可超过此值 */
     this._hardLimit = 100;
     this._paused = false;
+    /** @type {import("../config-manager/index.js").ConfigManager} */
+    this._conf = configManager;
   }
 
   // ── 基础属性 ──
@@ -234,22 +236,24 @@ class PowerManager {
   // ── 最终强度计算 ──
 
   /**
-   * 获取左通道最终强度
+   * 获取左通道强度
    * 叠加所有 left/both 事件 → clamp 到 [0, hardLimit]
-   * @returns {number}
+   * @returns {number[]}
    */
   getLeft() {
     if (this._paused) return 0;
-    return this._calcChannel('left');
+    const rawData = this._calcChannel('left', false);
+    return [Math.max(Math.floor(rawData * this._conf.castLeft), 0), rawData];
   }
 
   /**
-   * 获取右通道最终强度
-   * @returns {number}
+   * 获取右通道强度
+   * @returns {number[]}
    */
   getRight() {
     if (this._paused) return 0;
-    return this._calcChannel('right');
+    const rawData = this._calcChannel('right', false);
+    return [Math.max(Math.floor(rawData * this._conf.castRight), 0), rawData];
   }
 
   /**

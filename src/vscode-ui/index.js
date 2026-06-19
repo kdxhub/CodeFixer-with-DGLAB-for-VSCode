@@ -123,8 +123,14 @@ class StatusBarManager {
         this._statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         break;
       case ServerStatus.WORKING:
-        this._statusBar.text = `$(heart)DGLAB：${this._pm.getLeft()} | ${this._pm.getRight()}`;
-        this._statusBar.tooltip = `当前服务正在运行，已连接${connected}台客户端。\n两侧数字代表对应方向的强度。\n点按以暂停。`;
+        const data = [this._pm.getLeft(), this._pm.getRight()]
+        if (this._config.castShow) {
+          this._statusBar.text = `$(heart)DGLAB：${data[0][1]}→${data[0][0]} | ${data[1][1]}→${data[1][0]}`;
+          this._statusBar.tooltip = `当前服务正在运行，已连接${connected}台客户端。\n状态栏按从左到右将分别展示 A、B 通道的原始与输出强度。\n点按以暂停。`;
+        } else {
+          this._statusBar.text = `$(heart)DGLAB：${data[0][0]} | ${data[1][0]}`;
+          this._statusBar.tooltip = `当前服务正在运行，已连接${connected}台客户端。\n状态栏将按从左到右分别展示 A、B 通道的输出强度。\n点按以暂停。`;
+        }
         this._statusBar.backgroundColor = undefined;
         break;
       case ServerStatus.IDLE:

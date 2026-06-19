@@ -372,10 +372,20 @@
             "default": "随机",
             "description": "设置右通道波形。"
           },
-          "codefixer-with-dg-lab.interval": {
-            "type": "integer",
-            "default": 200,
-            "description": "强度数据下发间隔。每次强度变化都需要经过[此处设置]毫秒才会更新到APP端。"
+          "codefixer-with-dg-lab.cast.show": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否要在状态栏显示被映射系数影响前的数值。该设置会在左右系数均为 1.0 时禁用。"
+          },
+          "codefixer-with-dg-lab.cast.left": {
+            "type": "number",
+            "default": 1.0,
+            "description": "左侧最终强度映射系数：最终输出的强度是计算后的结果乘以本系数。小于等于0会禁用此通道输出。"
+          },
+          "codefixer-with-dg-lab.cast.right": {
+            "type": "number",
+            "default": 1.0,
+            "description": "右侧最终强度映射系数：最终输出的强度是计算后的结果乘以本系数。小于等于0会禁用此通道输出。"
           }
         }
       }
@@ -393,7 +403,7 @@
     "url": "https://kdx233.github.io"
   },
   "publisher": "kdxiaoyi",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "icon": "./images/icon_320.png",
   "engines": {
     "vscode": "^1.100.0"

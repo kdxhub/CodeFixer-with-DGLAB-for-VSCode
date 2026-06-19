@@ -19,7 +19,7 @@ const SERVER_ID = 'c87d4640-17f3-4e23-862c-4f6ef7c550dd';
 function activate(context) {
   // ── 1. 创建所有管理器实例（依赖注入） ──
   const configManager = new ConfigManager();
-  const powerManager = new PowerManager();
+  const powerManager = new PowerManager(configManager);
   const pulseManager = new PulseManager();
   const connectionManager = new ConnectionManager(SERVER_ID);
 

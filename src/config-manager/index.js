@@ -172,6 +172,19 @@ class ConfigManager {
     }
   }
 
+  get castLeft() {
+    return this._cache.get("cast.left");
+  }
+
+  get castRight() {
+    return this._cache.get("cast.right");
+  }
+
+  get castShow() {
+    if (this._cache.get("cast.right") == 1 && this._cache.get("cast.right") == 1) return false;
+    return this._cache.get("cast.show");
+  }
+
   // ── 工具方法 ──
   /**
    * 获取本地非回环 IPv4 地址

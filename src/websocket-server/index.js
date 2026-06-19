@@ -118,11 +118,11 @@ class WebSocketServer {
     this._cm.broadcastBound((appId, client) => {
       client.send(JSON.stringify({
         type: 'msg', clientId: sid, targetId: appId,
-        message: `strength-1+2+${this._pm.getLeft()}`,
+        message: `strength-1+2+${this._pm.getLeft()[0]}`,
       }));
       client.send(JSON.stringify({
         type: 'msg', clientId: sid, targetId: appId,
-        message: `strength-2+2+${this._pm.getRight()}`,
+        message: `strength-2+2+${this._pm.getRight()[0]}`,
       }));
     });
   }
