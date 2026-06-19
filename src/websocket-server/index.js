@@ -58,6 +58,9 @@ class WebSocketServer {
     this._onError = null;
     /** @type {function} 显示模态确认对话框，返回 Promise<boolean> */
     this._onConfirm = null;
+
+    /** 防抖定时器：事件触发后等待 interval 再下发 */
+    this._pendingPunishmentTimer = null;
   }
 
   /** 原始 wss 实例 */
@@ -122,6 +125,20 @@ class WebSocketServer {
         message: `strength-2+2+${this._pm.getRight()}`,
       }));
     });
+  }
+
+  /**
+   * 防抖下发：事件驱动时等待 interval 毫秒后再调用 distributePunishment
+   * 连续触发时会重置计时器，确保只有最后一次变化生效
+   */
+  schedulePunishment() {
+    if (this._pendingPunishmentTimer) {
+      clearTimeout(this._pendingPunishmentTimer);
+    }
+    this._pendingPunishmentTimer = setTimeout(() => {
+      this._pendingPunishmentTimer = null;
+      this.distributePunishment();
+    }, this._config.interval);
   }
 
   // ── 服务器生命周期 ──

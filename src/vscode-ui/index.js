@@ -139,7 +139,7 @@ class StatusBarManager {
         break;
     }
 
-    this._wsServer.distributePunishment();
+    this._wsServer.schedulePunishment();
   }
 
   /**
