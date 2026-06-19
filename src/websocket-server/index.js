@@ -352,13 +352,28 @@ class WebSocketServer {
       return;
     }
 
-    // ── APP 反馈（按钮按下 → 强制暂停）──
+    // ── APP 反馈 ──
+    // feedback 消息携带 APP 侧精确的增量，直接应用到 APP 事件，无异步问题
+    // strength 消息仅用于获取设备硬上限
     if (data.type === 'msg' && data.message.startsWith('feedback-') && !this._pm.paused) {
-      this.forcePause('APP按钮被点击。');
+      switch (data.message) {
+        case "feedback-0": this._applyAppDelta('left', -5); break;
+        case "feedback-1": this._applyAppDelta('left', -1); break;
+        case "feedback-3": this._applyAppDelta('left', +1); break;
+        case "feedback-4": this._applyAppDelta('left', +5); break;
+        case "feedback-5": this._applyAppDelta('right', -5); break;
+        case "feedback-6": this._applyAppDelta('right', -1); break;
+        case "feedback-8": this._applyAppDelta('right', +1); break;
+        case "feedback-9": this._applyAppDelta('right', +5); break;
+        default:
+          // 未知按钮 → 安全暂停
+          this.forcePause('APP按钮被点击。');
+          break;
+      }
       return;
     }
 
-    // ── APP 反馈强度 ──
+    // ── APP 强度回传（仅用于读取设备硬上限）──
     if (data.type === 'msg' && data.message.startsWith('strength-')) {
       const strengths = data.message.replace('strength-', '').split('+').map(Number);
       if (strengths.length !== 4) {
@@ -367,38 +382,7 @@ class WebSocketServer {
       }
       // 更新硬上限（来自 APP 端设备设定）
       this._pm.hardLimit = Math.max(strengths[2], strengths[3]);
-
-      // 通过事件 API 更新 APP 设置事件
-      const appLeft = this._pm.getEvent('_app_left');
-      const appRight = this._pm.getEvent('_app_right');
-      const curLeft = this._pm.getLeft();
-      const curRight = this._pm.getRight();
-      const appLeftVal = appLeft ? appLeft.value : 0;
-      const appRightVal = appRight ? appRight.value : 0;
-
-      if (strengths[0] === curLeft + 1) {
-        const newVal = appLeftVal + 1;
-        if (appLeft) { appLeft.value = newVal; }
-        else { this._pm.addEvent({ id: '_app_left', channel: 'left', value: newVal, category: 'persistent', label: 'APP设置' }); }
-      }
-      if (strengths[1] === curRight + 1) {
-        const newVal = appRightVal + 1;
-        if (appRight) { appRight.value = newVal; }
-        else { this._pm.addEvent({ id: '_app_right', channel: 'right', value: newVal, category: 'persistent', label: 'APP设置' }); }
-      }
-      if (strengths[0] === curLeft - 1) {
-        const newVal = Math.max(0, appLeftVal - 1);
-        if (appLeft) { appLeft.value = newVal; }
-        else { this._pm.addEvent({ id: '_app_left', channel: 'left', value: newVal, category: 'persistent', label: 'APP设置' }); }
-      }
-      if (strengths[1] === curRight - 1) {
-        const newVal = Math.max(0, appRightVal - 1);
-        if (appRight) { appRight.value = newVal; }
-        else { this._pm.addEvent({ id: '_app_right', channel: 'right', value: newVal, category: 'persistent', label: 'APP设置' }); }
-      }
-
-      console.log('[normal]APP 强度反馈已处理，当前事件:', this._pm.getAllEvents());
-      this._notifyStatus(this._getCurrentStatus());
+      console.log(`[strength]硬上限已更新为 ${this._pm.hardLimit}`);
       return;
     }
   }
@@ -421,6 +405,29 @@ class WebSocketServer {
     console.error('WebSocket 连接错误：', error);
     this._cm.removeByWs(ws);
     this._notifyWarn(`客户端连接错误：${error.message}`);
+    this._notifyStatus(this._getCurrentStatus());
+  }
+
+  // ── 辅助方法 ──
+
+  /**
+   * 将 APP 反馈的增量应用到对应的 APP 事件
+   * @param {'left'|'right'} channel
+   * @param {number} delta 增量（可正可负）
+   */
+  _applyAppDelta(channel, delta) {
+    const eventId = channel === 'left' ? '_app_left' : '_app_right';
+    const existing = this._pm.getEvent(eventId);
+    const newVal = Math.max(0, (existing ? existing.value : 0) + delta);
+    if (existing) {
+      existing.value = newVal;
+    } else {
+      this._pm.addEvent({
+        id: eventId, channel, value: newVal,
+        category: 'persistent', label: 'APP设置',
+      });
+    }
+    console.log(`APP ${channel} 侧调整: ${delta >= 0 ? '+' : ''}${delta}, 新值=${newVal}`);
     this._notifyStatus(this._getCurrentStatus());
   }
 
