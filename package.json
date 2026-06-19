@@ -372,6 +372,11 @@
             "default": "随机",
             "description": "设置右通道波形。"
           }
+        },
+        "codefixer-with-dg-lab.interval": {
+          "type": "integer",
+          "default": 200,
+          "description": "强度数据下发间隔。每次强度变化都需要经过[此处设置]毫秒才会更新到APP端。"
         }
       }
     ]

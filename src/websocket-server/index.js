@@ -270,7 +270,7 @@ class WebSocketServer {
           }));
         });
         this.distributePunishment();
-      }, 60 * 1000);
+      }, this._config.interval);
     }
 
     if (!this._pulseInterval) {

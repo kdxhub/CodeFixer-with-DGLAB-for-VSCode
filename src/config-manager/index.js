@@ -154,13 +154,22 @@ class ConfigManager {
   awardAct(cfg) { return cfg.act; }
   awardDuration(cfg) { return cfg.duration; }
 
-  // ── 波形配置 ──
+  // ── 其他设置 ──
   get pulseLeft() {
     return this._cache.get('pulse.left');
   }
 
   get pulseRight() {
     return this._cache.get('pulse.right');
+  }
+
+  get interval() {
+    const rawData = this._cache.get("interval");
+    if (rawData && rawData > 0) {
+      return rawData;
+    } else {
+      return 200;
+    }
   }
 
   // ── 工具方法 ──
