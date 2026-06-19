@@ -70,7 +70,7 @@
           "codefixer-with-dg-lab.code.infoFirst": {
             "type": "number",
             "default": 0,
-            "description": "第一个信息增加的强度"
+            "description": "第一个信息增加的强度\n（提示：下文全部强度都可以输入负数，此时表示触发时抵消强度）"
           },
           "codefixer-with-dg-lab.code.infoEvery": {
             "type": "number",
@@ -167,6 +167,201 @@
             "type": "string",
             "default": "杂鱼～命令执行出错了哦～要狠狠电击惩罚一下了呢，再加%strength%档～～",
             "description": "当终端产生错误时，进行什么提示。设置为空不提示。\n可以使用的占位符： %strength% = 当前惩罚强度；%duration% = 当前惩罚时间（毫秒）。"
+          }
+        }
+      },
+      {
+        "title": "行为反馈回路机制设定",
+        "properties": {
+          "codefixer-with-dg-lab.award.debugging.breakpoint.new": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：新增断点」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.breakpoint.remove": {
+            "type": "number",
+            "default": "-10",
+            "description": "当「调试：移除断点」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.breakpoint.new.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：新增断点」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.breakpoint.remove.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：移除断点」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.out.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：单步跳出」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.out.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：单步跳出」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.in.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：单步跳入」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.in.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：单步跳入」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.onebyone.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：逐过程」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.onebyone.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：逐过程」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.pause.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：暂停」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.pause.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：暂停」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.restart.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：重启」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.restart.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：重启」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.stop.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：结束」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.stop.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：结束」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.debugging.start.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「调试：开始」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.debugging.start.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「调试：开始」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.rclick.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「右键点击」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.rclick.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「右键点击」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.lclick.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「左键点击」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.lclick.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「左键点击」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.typing.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「键入字符」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.typing.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「键入字符」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.scm.remove.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「源代码管理：从暂存区移除文件」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.scm.remove.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「源代码管理：从暂存区移除文件」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.scm.add.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「源代码管理：添加文件到暂存区」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.scm.add.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「源代码管理：添加文件到暂存区」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.scm.checkout.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「源代码管理：签出」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.scm.checkout.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「源代码管理：签出」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.scm.commit.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「源代码管理：提交」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.scm.commit.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「源代码管理：提交」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.create.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「新建文件」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.create.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「新建文件」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.open.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「打开」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.open.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「打开」行为带来的强度的持续时间，小于等于0为不使用本功能。"
+          },
+          "codefixer-with-dg-lab.award.save.act": {
+            "type": "number",
+            "default": 10,
+            "description": "当「保存」时要增加的强度。"
+          },
+          "codefixer-with-dg-lab.award.save.duration": {
+            "type": "number",
+            "default": 0,
+            "description": "「保存」行为带来的强度的持续时间，小于等于0为不使用本功能。"
           }
         }
       },

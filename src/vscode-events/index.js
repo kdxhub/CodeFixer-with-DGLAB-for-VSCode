@@ -206,6 +206,23 @@ class VscodeEventHandler {
     }
   }
 
+  async _ensureShellIntegration() {
+    const config = vscode.workspace.getConfiguration('terminal.integrated');
+    const enabled = config.get('shellIntegration.enabled');
+
+    if (!enabled) {
+      const answer = await vscode.window.showInformationMessage(
+        '需要启用终端 Shell 集成才能处理终端命令执行结果，是否现在开启？',
+        '开启',
+        '暂不'
+      );
+      if (answer === '开启') {
+        await config.update('shellIntegration.enabled', true, vscode.ConfigurationTarget.Global);
+        vscode.window.showInformationMessage('Shell 集成已启用，请重启终端');
+      }
+    }
+  }
+
   // ── 注册 VSCode 监听器 ──
 
   /**
@@ -224,23 +241,6 @@ class VscodeEventHandler {
     context.subscriptions.push(
       vscode.window.onDidEndTerminalShellExecution((e) => this.processTerminalExecution(e))
     );
-  }
-
-  async _ensureShellIntegration() {
-    const config = vscode.workspace.getConfiguration('terminal.integrated');
-    const enabled = config.get('shellIntegration.enabled');
-
-    if (!enabled) {
-      const answer = await vscode.window.showInformationMessage(
-        '需要启用终端 Shell 集成才能处理终端命令执行结果，是否现在开启？',
-        '开启',
-        '暂不'
-      );
-      if (answer === '开启') {
-        await config.update('shellIntegration.enabled', true, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage('Shell 集成已启用，请重启终端');
-      }
-    }
   }
 }
 
