@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "command": "bash ./.utils/build.linux.sh",
+      "command": "bash ./.utils/build.bash.sh",
       "promptOnClose": true,
       "type": "shell",
       "group": {
@@ -10,6 +10,7 @@
         "isDefault": true
       },
       "label": "构建VSIX文件",
+      "problemMatcher": []
     }
   ]
 }
