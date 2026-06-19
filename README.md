@@ -1,4 +1,4 @@
-<center><h1>CodeFixer-with-DGLAB-for-VSCode</h1><p>一种基于DGLAB与碳基低速神经网络的自动纠错插件，适用于VSCode</p></center>
+<center><h1>CodeFixer-with-DGLAB-for-VSCode</h1><p>一种基于DGLAB与碳基低速神经网络的自动纠错插件，适用于VSCode。<br>支持但不限于代码纠错，终端纠错，键入、调试、源代码管理等行为的激励等。</p></center>
 
 # 前言
 
