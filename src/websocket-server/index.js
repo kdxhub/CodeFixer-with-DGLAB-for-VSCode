@@ -347,15 +347,39 @@ class WebSocketServer {
         console.warn(`消息${id} 无效，反馈强度格式不正确。`);
         return;
       }
-      this._pm.leftMax = strengths[2];
-      this._pm.rightMax = strengths[3];
+      // 更新硬上限（来自 APP 端设备设定）
+      this._pm.hardLimit = Math.max(strengths[2], strengths[3]);
 
-      const lc = this._pm.getLeft();
-      const rc = this._pm.getRight();
-      if (strengths[0] === lc + 1) this._pm.setLeft(2, this._pm.leftValues[2] + 1);
-      if (strengths[1] === rc + 1) this._pm.setRight(2, this._pm.rightValues[2] + 1);
-      if (strengths[0] === lc - 1) this._pm.setLeft(2, Math.max(0, this._pm.leftValues[2] - 1));
-      if (strengths[1] === rc - 1) this._pm.setRight(2, Math.max(0, this._pm.rightValues[2] - 1));
+      // 通过事件 API 更新 APP 设置事件
+      const appLeft = this._pm.getEvent('_app_left');
+      const appRight = this._pm.getEvent('_app_right');
+      const curLeft = this._pm.getLeft();
+      const curRight = this._pm.getRight();
+      const appLeftVal = appLeft ? appLeft.value : 0;
+      const appRightVal = appRight ? appRight.value : 0;
+
+      if (strengths[0] === curLeft + 1) {
+        const newVal = appLeftVal + 1;
+        if (appLeft) { appLeft.value = newVal; }
+        else { this._pm.addEvent({ id: '_app_left', channel: 'left', value: newVal, category: 'persistent', label: 'APP设置' }); }
+      }
+      if (strengths[1] === curRight + 1) {
+        const newVal = appRightVal + 1;
+        if (appRight) { appRight.value = newVal; }
+        else { this._pm.addEvent({ id: '_app_right', channel: 'right', value: newVal, category: 'persistent', label: 'APP设置' }); }
+      }
+      if (strengths[0] === curLeft - 1) {
+        const newVal = Math.max(0, appLeftVal - 1);
+        if (appLeft) { appLeft.value = newVal; }
+        else { this._pm.addEvent({ id: '_app_left', channel: 'left', value: newVal, category: 'persistent', label: 'APP设置' }); }
+      }
+      if (strengths[1] === curRight - 1) {
+        const newVal = Math.max(0, appRightVal - 1);
+        if (appRight) { appRight.value = newVal; }
+        else { this._pm.addEvent({ id: '_app_right', channel: 'right', value: newVal, category: 'persistent', label: 'APP设置' }); }
+      }
+
+      console.log('APP 强度反馈已处理，当前事件:', this._pm.getAllEvents());
       this._notifyStatus(this._getCurrentStatus());
       return;
     }

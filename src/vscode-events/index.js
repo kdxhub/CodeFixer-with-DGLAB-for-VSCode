@@ -2,9 +2,11 @@ const vscode = require('vscode');
 
 /**
  * VSCode 事件处理器
- * 负责监听 VSCode 的诊断变化和终端执行事件，
- * 计算强度后写入 PowerManager，并通过回调通知 UI 更新。
- * 依赖注入：PowerManager, ConfigManager
+ * 监听 VSCode 诊断变化和终端执行事件，
+ * 通过 PowerManager 的事件 API 管理强度贡献。
+ *
+ * 诊断 → 长期事件（persistent）：每次重新计算后 updateEvent 修改值
+ * 终端 → 临时事件（temporary）：每次执行创建独立事件，duration 后自动过期
  */
 class VscodeEventHandler {
   /**
@@ -16,80 +18,38 @@ class VscodeEventHandler {
     this._config = configManager;
     /** @type {function} UI 更新回调 */
     this._onUpdate = null;
+
+    /** 诊断事件是否已初始化 */
+    this._diagnosticsInited = false;
   }
 
   /**
    * 注册 UI 更新回调
    * @param {() => void} cb
    */
-  onUpdate(cb) {
-    this._onUpdate = cb;
-  }
+  onUpdate(cb) { this._onUpdate = cb; }
 
-  /** 触发 UI 更新 */
-  _notifyUpdate() {
-    if (this._onUpdate) this._onUpdate();
-  }
-
-  // ── 强度分配工具 ──
-
-  /**
-   * 根据配置模式将强度分配到左右通道
-   * @param {number} strength
-   * @param {number} sourceIndex 来源索引 (0=代码纠错, 1=终端纠错)
-   */
-  _distributeStrength(strength, sourceIndex) {
-    const mode = this._config.codeMode;
-    switch (mode) {
-      case 'left':
-        this._pm.setRight(sourceIndex, 0);
-        this._pm.setLeft(sourceIndex, strength);
-        break;
-      case 'right':
-        this._pm.setRight(sourceIndex, strength);
-        this._pm.setLeft(sourceIndex, 0);
-        break;
-      case 'bothAvg':
-        this._pm.setRight(sourceIndex, Math.floor(strength / 2));
-        this._pm.setLeft(sourceIndex, Math.floor(strength / 2));
-        break;
-      case 'bothAll':
-        this._pm.setRight(sourceIndex, strength);
-        this._pm.setLeft(sourceIndex, strength);
-        break;
-      default:
-        // 随机一边
-        if (Math.random() <= 0.5) {
-          this._pm.setRight(sourceIndex, strength);
-          this._pm.setLeft(sourceIndex, 0);
-        } else {
-          this._pm.setRight(sourceIndex, 0);
-          this._pm.setLeft(sourceIndex, strength);
-        }
-        break;
-    }
-  }
+  _notifyUpdate() { if (this._onUpdate) this._onUpdate(); }
 
   // ── 诊断事件处理 ──
 
   /**
-   * 处理诊断变化事件
+   * 处理诊断变化
+   * 创建/更新长期强度事件
    */
   processDiagnostics() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      this._pm.setLeft(0, 0);
-      this._pm.setRight(0, 0);
-      console.log('上传纠错强度：0（无编辑器）');
+      // 无编辑器时归零代码事件
+      if (this._pm.hasEvent('_code_left')) this._pm.updateEvent('_code_left', 0);
+      if (this._pm.hasEvent('_code_right')) this._pm.updateEvent('_code_right', 0);
+      console.log('诊断强度归零（无编辑器）');
       this._notifyUpdate();
       return;
     }
 
-    // 分类统计
-    let errors = 0;
-    let warnings = 0;
-    let infos = 0;
-
+    // 统计诊断数量
+    let errors = 0, warnings = 0, infos = 0;
     const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
     for (const d of diagnostics) {
       switch (d.severity) {
@@ -121,16 +81,70 @@ class VscodeEventHandler {
       strength += this._config.codeInfo.every * (infos - 1);
     }
 
-    console.log('上传纠错强度：', strength);
-    this._distributeStrength(strength, 0); // 索引0 = 代码纠错
-    console.log('更新强度：', this._pm.leftValues, this._pm.rightValues);
+    // 根据模式分配左右通道，写入长期事件
+    const mode = this._config.codeMode;
+    const leftVal = this._calcChannelValue(mode, strength);
+    const rightVal = this._calcChannelValueReverse(mode, strength);
+
+    console.log('诊断强度计算:', { strength, mode, leftVal, rightVal });
+
+    if (leftVal !== undefined) {
+      if (this._pm.hasEvent('_code_left')) {
+        this._pm.updateEvent('_code_left', leftVal);
+      } else {
+        this._pm.addEvent({
+          id: '_code_left', channel: 'left', value: leftVal,
+          category: 'persistent', label: '代码纠错',
+        });
+      }
+    }
+
+    if (rightVal !== undefined) {
+      if (this._pm.hasEvent('_code_right')) {
+        this._pm.updateEvent('_code_right', rightVal);
+      } else {
+        this._pm.addEvent({
+          id: '_code_right', channel: 'right', value: rightVal,
+          category: 'persistent', label: '代码纠错',
+        });
+      }
+    }
+
+    console.log('当前所有强度事件:', this._pm.getAllEvents());
     this._notifyUpdate();
+  }
+
+  /**
+   * 根据模式计算单侧强度值
+   * @param {string} mode
+   * @param {number} total
+   * @returns {number|undefined}
+   */
+  _calcChannelValue(mode, total) {
+    switch (mode) {
+      case 'left': return total;
+      case 'right': return 0;
+      case 'bothAvg': return Math.floor(total / 2);
+      case 'bothAll': return total;
+      default: return Math.random() <= 0.5 ? total : 0;
+    }
+  }
+
+  _calcChannelValueReverse(mode, total) {
+    switch (mode) {
+      case 'left': return 0;
+      case 'right': return total;
+      case 'bothAvg': return Math.floor(total / 2);
+      case 'bothAll': return total;
+      default: return Math.random() <= 0.5 ? 0 : total;
+    }
   }
 
   // ── 终端事件处理 ──
 
   /**
    * 处理终端执行事件
+   * 每次执行创建一个独立的临时强度事件，duration 后自动过期
    * @param {import('vscode').TerminalShellExecutionEvent} event
    */
   processTerminalExecution(event) {
@@ -145,25 +159,40 @@ class VscodeEventHandler {
     if (exitCode <= 0 || rate <= 0 || duration <= 0) return;
 
     const strength = exitCode * rate;
-    console.log('上传终端强度：', strength);
+    console.log('终端执行：exitCode=%d, rate=%d, strength=%d, duration=%dms',
+      exitCode, rate, strength, duration);
 
-    const originLeft = this._pm.leftValues[1];
-    const originRight = this._pm.rightValues[1];
-    const irreversible = this._config.terminalIrreversible;
+    // 为左右各创建一个临时事件（唯一 ID）
+    const mode = this._config.codeMode;
+    const leftVal = this._calcChannelValue(mode, strength);
+    const rightVal = this._calcChannelValueReverse(mode, strength);
 
-    this._distributeStrength(strength, 1); // 索引1 = 终端纠错
+    const timestamp = Date.now();
+    const rand = Math.random().toString(36).slice(2, 6);
 
-    // 如果可逆，设定时器恢复
-    if (irreversible) {
-      setTimeout(() => {
-        this._pm.setLeft(1, this._pm.leftValues[1] - strength);
-        this._pm.setRight(1, this._pm.rightValues[1] - strength);
-        console.log('恢复终端强度：', this._pm.leftValues, this._pm.rightValues);
-        this._notifyUpdate();
-      }, duration);
+    if (leftVal > 0) {
+      this._pm.addEvent({
+        id: `_term_left_${timestamp}_${rand}`,
+        channel: 'left',
+        value: leftVal,
+        category: 'temporary',
+        label: '终端退出码',
+        duration,
+      });
     }
 
-    console.log('更新强度：', this._pm.leftValues, this._pm.rightValues);
+    if (rightVal > 0) {
+      this._pm.addEvent({
+        id: `_term_right_${timestamp}_${rand}`,
+        channel: 'right',
+        value: rightVal,
+        category: 'temporary',
+        label: '终端退出码',
+        duration,
+      });
+    }
+
+    console.log('终端强度事件已添加，当前所有事件:', this._pm.getAllEvents());
     this._notifyUpdate();
 
     // 显示提示
@@ -184,32 +213,19 @@ class VscodeEventHandler {
    * @param {vscode.ExtensionContext} context
    */
   registerListeners(context) {
-    // 诊断变化
     context.subscriptions.push(
-      vscode.languages.onDidChangeDiagnostics(() => {
-        this.processDiagnostics();
-      })
+      vscode.languages.onDidChangeDiagnostics(() => this.processDiagnostics())
+    );
+    context.subscriptions.push(
+      vscode.window.onDidChangeVisibleTextEditors(() => this.processDiagnostics())
     );
 
-    // 可见编辑器变化
-    context.subscriptions.push(
-      vscode.window.onDidChangeVisibleTextEditors(() => {
-        this.processDiagnostics();
-      })
-    );
-
-    // 终端执行
     this._ensureShellIntegration();
     context.subscriptions.push(
-      vscode.window.onDidEndTerminalShellExecution((e) => {
-        this.processTerminalExecution(e);
-      })
+      vscode.window.onDidEndTerminalShellExecution((e) => this.processTerminalExecution(e))
     );
   }
 
-  /**
-   * 确保终端 Shell 集成已启用
-   */
   async _ensureShellIntegration() {
     const config = vscode.workspace.getConfiguration('terminal.integrated');
     const enabled = config.get('shellIntegration.enabled');
@@ -220,7 +236,6 @@ class VscodeEventHandler {
         '开启',
         '暂不'
       );
-
       if (answer === '开启') {
         await config.update('shellIntegration.enabled', true, vscode.ConfigurationTarget.Global);
         vscode.window.showInformationMessage('Shell 集成已启用，请重启终端');
