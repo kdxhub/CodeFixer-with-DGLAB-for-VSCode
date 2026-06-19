@@ -267,7 +267,7 @@
     "url": "https://kdx233.github.io"
   },
   "publisher": "kdxiaoyi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "icon": "./images/icon_320.png",
   "engines": {
     "vscode": "^1.100.0"

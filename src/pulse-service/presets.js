@@ -1,3 +1,7 @@
+/**
+ * 波形预设数据
+ * 与 VS Code / DGLAB 完全解耦，纯数据模块。
+ */
 const map = [
   '["0A0A0A0A00000000", "0B0B0B0B10101010", "0D0D0D0D21212121", "0E0E0E0E32323232", "1010101042424242", "1212121253535353", "1313131364646464", "151515155C5C5C5C", "1616161654545454", "181818184C4C4C4C", "1A1A1A1A44444444", "1A1A1A1A00000000", "1B1B1B1B10101010", "1D1D1D1D21212121", "1E1E1E1E32323232", "2020202042424242", "2222222253535353", "2323232364646464", "252525255C5C5C5C", "2626262654545454", "282828284C4C4C4C", "2A2A2A2A44444444", "0A0A0A0A00000000"]',
   '["0A0A0A0A64646464", "0A0A0A0A00000000", "0A0A0A0A64646464", "0A0A0A0A42424242", "0A0A0A0A21212121", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A64646464", "0A0A0A0A00000000", "0A0A0A0A64646464", "0A0A0A0A42424242", "0A0A0A0A21212121", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A64646464", "0A0A0A0A00000000", "0A0A0A0A64646464", "0A0A0A0A42424242", "0A0A0A0A21212121", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A00000000"]',
@@ -17,29 +21,24 @@ const map = [
   '["0A0A0A0A00000000", "0A0A0A0A14141414", "0A0A0A0A28282828", "0A0A0A0A3C3C3C3C", "0A0A0A0A50505050", "0A0A0A0A64646464", "0A0A0A0A64646464", "0A0A0A0A64646464", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A00000000", "0A0A0A0A00000000"]',
 ];
 
+const presetNames = [
+  '潮汐', '连击', '快速按捏', '按捏渐强', '心跳节奏',
+  '压缩', '节奏步伐', '颗粒摩擦', '渐变弹跳', '波浪涟漪',
+  '雨水冲刷', '变速敲击', '信号灯', '挑逗1', '挑逗2', '呼吸',
+];
+
 /**
- * @param {String} name
+ * 根据预设名称获取波形数据
+ * @param {string} name 预设名称
+ * @returns {string} JSON 波形数据字符串
  */
-function get(name) {
-  switch (name) {
-    case "潮汐": return map[0];
-    case "连击": return map[1];
-    case "快速按捏": return map[2];
-    case "按捏渐强": return map[3];
-    case "心跳节奏": return map[4];
-    case "压缩": return map[5];
-    case "节奏步伐": return map[6];
-    case "颗粒摩擦": return map[7];
-    case "渐变弹跳": return map[8];
-    case "波浪涟漪": return map[9];
-    case "雨水冲刷": return map[10];
-    case "变速敲击": return map[11];
-    case "信号灯": return map[12];
-    case "挑逗1": return map[13];
-    case "挑逗2": return map[14];
-    case "呼吸": return map[15];
-    default: return map[Math.floor(Math.random() * (map.length - 1))];
+function getPreset(name) {
+  const index = presetNames.indexOf(name);
+  if (index !== -1) {
+    return map[index];
   }
+  // 随机
+  return map[Math.floor(Math.random() * (map.length - 1))];
 }
 
-module.exports = {get};
+module.exports = { getPreset, presetNames };
