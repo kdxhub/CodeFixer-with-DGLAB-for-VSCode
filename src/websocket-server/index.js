@@ -318,7 +318,7 @@ class WebSocketServer {
 
   _handleMessage(ws, ev) {
     const id = `#${Math.floor(Math.random() * 1e6)}`;
-    console.log(`收到消息${id}：`, ev);
+    console.log(`[normal]收到消息${id}：`, ev);
 
     let data;
     try {
@@ -397,7 +397,7 @@ class WebSocketServer {
         else { this._pm.addEvent({ id: '_app_right', channel: 'right', value: newVal, category: 'persistent', label: 'APP设置' }); }
       }
 
-      console.log('APP 强度反馈已处理，当前事件:', this._pm.getAllEvents());
+      console.log('[normal]APP 强度反馈已处理，当前事件:', this._pm.getAllEvents());
       this._notifyStatus(this._getCurrentStatus());
       return;
     }

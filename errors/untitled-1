@@ -1,0 +1,8 @@
+package com.github.kdxhub.dglab.errors.test;
+// 你可以在这个文件里面检测一些事件的效果，例如键入、断点……
+
+class Test {
+  public static void main(String[] args) {
+    System.out.println("Hello, World!");
+  }
+}
